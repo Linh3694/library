@@ -37,6 +37,13 @@ interface ApiResponse {
   total: number;
 }
 
+// Modal state interface
+interface ModalState {
+  isOpen: boolean;
+  currentImageIndex: number;
+  currentActivity: LibraryActivity | null;
+}
+
 // Real API function to fetch activities
 const fetchActivitiesAPI = async (page: number, limit: number): Promise<ApiResponse> => {
   try {
@@ -54,12 +61,87 @@ const fetchActivitiesAPI = async (page: number, limit: number): Promise<ApiRespo
   }
 };
 
+// Image Modal Component
+const ImageModal = ({ modalState, setModalState }: {
+  modalState: ModalState;
+  setModalState: (state: ModalState) => void;
+}) => {
+  if (!modalState.isOpen || !modalState.currentActivity) return null;
+
+  const images = modalState.currentActivity.images;
+  const currentImage = images[modalState.currentImageIndex];
+
+  const handlePrevious = () => {
+    const newIndex = modalState.currentImageIndex > 0 
+      ? modalState.currentImageIndex - 1 
+      : images.length - 1;
+    setModalState({
+      ...modalState,
+      currentImageIndex: newIndex
+    });
+  };
+
+  const handleNext = () => {
+    const newIndex = modalState.currentImageIndex < images.length - 1 
+      ? modalState.currentImageIndex + 1 
+      : 0;
+    setModalState({
+      ...modalState,
+      currentImageIndex: newIndex
+    });
+  };
+
+  const handleClose = () => {
+    setModalState({
+      isOpen: false,
+      currentImageIndex: 0,
+      currentActivity: null
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      handleClose();
+    } else if (e.key === 'ArrowLeft') {
+      handlePrevious();
+    } else if (e.key === 'ArrowRight') {
+      handleNext();
+    }
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      onClick={handleClose}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
+      <div className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4">
+        {/* Image */}
+        <div className="flex flex-col items-center justify-center max-w-full max-h-full">
+          <img
+            src={currentImage.url}
+            alt={currentImage.caption || modalState.currentActivity.title}
+            className="max-w-full max-h-[80vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ActivitiesHomePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [activities, setActivities] = useState<LibraryActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(1);
+  const [modalState, setModalState] = useState<ModalState>({
+    isOpen: false,
+    currentImageIndex: 0,
+    currentActivity: null
+  });
 
   const activitiesPerPage = 20;
 
@@ -86,6 +168,42 @@ const ActivitiesHomePage = () => {
     fetchActivities();
   }, [currentPage]);
 
+  // Handle keyboard events for modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (modalState.isOpen) {
+        if (e.key === 'Escape') {
+          setModalState({
+            isOpen: false,
+            currentImageIndex: 0,
+            currentActivity: null
+          });
+        } else if (e.key === 'ArrowLeft' && modalState.currentActivity) {
+          const images = modalState.currentActivity.images;
+          const newIndex = modalState.currentImageIndex > 0 
+            ? modalState.currentImageIndex - 1 
+            : images.length - 1;
+          setModalState({
+            ...modalState,
+            currentImageIndex: newIndex
+          });
+        } else if (e.key === 'ArrowRight' && modalState.currentActivity) {
+          const images = modalState.currentActivity.images;
+          const newIndex = modalState.currentImageIndex < images.length - 1 
+            ? modalState.currentImageIndex + 1 
+            : 0;
+          setModalState({
+            ...modalState,
+            currentImageIndex: newIndex
+          });
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [modalState]);
+
   // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -99,6 +217,15 @@ const ActivitiesHomePage = () => {
       date1: images.slice(0, 4),
       date2: images.slice(4, 8)
     };
+  };
+
+  // Handle image click
+  const handleImageClick = (activity: LibraryActivity, imageIndex: number) => {
+    setModalState({
+      isOpen: true,
+      currentImageIndex: imageIndex,
+      currentActivity: activity
+    });
   };
 
   return (
@@ -140,7 +267,7 @@ const ActivitiesHomePage = () => {
                     const imageGroups = getImagesByDate(activity);
                     
                     return (
-                      <div key={activity._id} className="space-y-6">
+                      <div key={activity._id} className="space-y-6 pb-[10%]">
                         {/* Activity Title */}
                         <h2 className="text-2xl font-bold text-[#002855] text-left">
                           {activity.title}
@@ -157,7 +284,11 @@ const ActivitiesHomePage = () => {
                               <div className="flex-1">
                                 <div className="grid grid-cols-4 gap-4">
                                   {imageGroups.date1.map((image: string, index: number) => (
-                                    <div key={index} className="aspect-[4/3] rounded-2xl overflow-hidden">
+                                    <div 
+                                      key={index} 
+                                      className="aspect-[4/3] rounded-4xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                      onClick={() => handleImageClick(activity, index)}
+                                    >
                                       <img
                                         src={image}
                                         alt={`${activity.title} ${index + 1}`}
@@ -179,7 +310,11 @@ const ActivitiesHomePage = () => {
                               <div className="flex-1">
                                 <div className="grid grid-cols-4 gap-4">
                                   {imageGroups.date2.map((image: string, index: number) => (
-                                    <div key={index + 4} className="aspect-[4/3] rounded-2xl overflow-hidden">
+                                    <div 
+                                      key={index + 4} 
+                                      className="aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                      onClick={() => handleImageClick(activity, index + 4)}
+                                    >
                                       <img
                                         src={image}
                                         alt={`${activity.title} ${index + 5}`}
@@ -218,6 +353,9 @@ const ActivitiesHomePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      <ImageModal modalState={modalState} setModalState={setModalState} />
 
       <Footer />
     </div>
