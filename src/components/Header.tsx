@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import WellspringLogo from '../../public/wellspring-logo.png';
 
@@ -11,11 +12,13 @@ const Header: React.FC<HeaderProps> = ({
   userName = "Nguyễn Hải Linh", 
   className 
 }) => {
+  const location = useLocation();
+  
   const menuItems = [
     { label: 'Trang chủ', href: '/' },
     { label: 'Thư viện sách', href: '/library' },
     { label: 'Hoạt động', href: '/activities' },
-    { label: 'Muốn - Trả sách', href: '/borrow-return' },
+    { label: 'Mượn - Trả sách', href: '/borrow' },
     { label: 'Tìm kiếm sách', href: '/search' },
   ];
 
@@ -38,13 +41,18 @@ const Header: React.FC<HeaderProps> = ({
              {/* Navigation Menu */}
              <nav className="hidden md:flex items-center space-x-8">
                {menuItems.map((item) => (
-                 <a
+                 <Link
                    key={item.label}
-                   href={item.href}
-                   className="text-[#002855] hover:text-[#002855] px-3 py-2 text-sm font-bold transition-colors duration-200"
+                   to={item.href}
+                   className={cn(
+                     "px-3 py-2 text-sm font-bold transition-colors duration-200",
+                     location.pathname === item.href 
+                       ? "text-[#002855] border-b-2 border-[#002855]"
+                       : "text-[#002855] hover:text-[#004080]"
+                   )}
                  >
                    {item.label}
-                 </a>
+                 </Link>
                ))}
              </nav>
            </div>

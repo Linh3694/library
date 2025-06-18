@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { cn } from '../lib/utils';
-import { API_URL } from '../lib/config';
+import { cn } from '../../lib/utils';
+import { API_URL } from '../../lib/config';
 
 interface Book {
   _id?: string;
@@ -62,7 +62,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
       className
     )}>
       {/* Main Content Container */}
-      <div className="flex items-start w-full max-w-8xl mx-auto px-20 pt-20">
+      <div className="flex items-start w-full pt-20 mx-20">
         {/* Left Section - 1 Book with Circle Background */}
         <div className="flex-1 flex justify-center items-start py-10">
           {loading ? (
@@ -80,7 +80,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
             </div>
           ) : books.length > 0 ? (
             // First book with special layout
-            <div className="flex flex-col items-center mt-[50%] ml-32">
+            <div className="flex flex-col items-start mt-[80%] ml-[10%]">
               {/* Circle Container */}
               <div className="relative w-96 h-64 rounded-full bg-gray-100 flex items-center justify-center mb-8 group">
                 {/* Book Cover */}
@@ -101,13 +101,6 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                       </div>
                     </div>
                   )}
-                </div>
-
-                {/* Arrow Icon - Top Right */}
-                <div className="absolute top-8 right-8 bg-white rounded-full p-3 shadow-lg text-gray-500 hover:text-gray-700 transition-colors">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
                 </div>
               </div>
 
@@ -143,26 +136,27 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
         </div>
 
         {/* Center Section - Discover Circle */}
-        <div className="flex-1 flex justify-center items-center pt-[10%]">
+        <div className="flex-1 flex justify-start items-center pt-[15%]">
           <div className="relative">
             {/* Main Circle */}
             <div className="w-80 h-80 rounded-full border-4 border-[#F05023] flex items-center justify-center bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer group">
               <div className="text-center">
-                <h3 className="text-4xl font-extrabold text-[#F05023] mb-4">
+                <h3 className="text-4xl font-extrabold text-[#F05023]">
                   KHÁM PHÁ
                 </h3>
-                <div className="w-12 h-12 mx-auto bg-[#F05023] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
               </div>
+            </div>
+            {/* Arrow Icon - Top Right Corner */}
+            <div className="absolute -top-2 -right-2 w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
             </div>
           </div>
         </div>
 
         {/* Right Section - 2 Books with Different Heights */}
-        <div className="flex-1 flex justify-start items-start pt-20">
+        <div className="flex-1 flex justify-start items-start pt-[10%] mr-[5%]">
           <div className="flex gap-8 items-start">
             {loading ? (
               // Loading skeleton
@@ -184,7 +178,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                 {/* Tall Book - Right */}
                 <div className="flex flex-col items-center text-center animate-pulse">
                   <div className="relative mb-4 flex items-center justify-center">
-                                                                                      {/* Gray Oval Background */}
+                        {/* Gray Oval Background */}
                         <div className="absolute bg-gray-200 w-[400px] h-[640px] rounded-full"></div>
                         {/* Book Placeholder */}
                        <div className="relative z-10 w-[320px] h-[480px] bg-gray-300 rounded-lg"></div>
@@ -205,7 +199,6 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                   <div className="relative mb-4 flex items-center justify-center">
                     {/* Gray Oval Background - Horizontal for short book */}
                     <div className="absolute bg-gray-200 w-[400px] h-[250px] rounded-full"></div>
-                    
                     {/* Book Cover - Double size */}
                     <div className="relative z-10 flex items-center justify-center w-[150px] h-[200px]">
                       {books.length > 1 && books[1].coverImage ? (
@@ -249,14 +242,14 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                   {/* Book Cover Container with Gray Oval Background */}
                   <div className="relative mb-4 flex items-center justify-center">
                     {/* Gray Oval Background - Vertical for tall book */}
-                    <div className="absolute bg-gray-200 w-[350px] h-[500px] rounded-full -top-10"></div>
+                    <div className="absolute bg-gray-200 w-[350px] h-[500px] rounded-[100px] -top-10"></div>
                     {/* Book Cover - Double size */}
                     <div className="relative z-10 flex items-center justify-center w-[250px] h-[333px] top-10">
                       {books.length > 2 && books[2].coverImage ? (
                         <img 
                           src={books[2].coverImage} 
                           alt={books[2].bookTitle}
-                          className="w-full h-full object-cover rounded-lg shadow-xl"
+                          className="w-full h-full object-cover rounded-4xl shadow-xl"
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-300 flex items-center justify-center rounded-lg shadow-xl">

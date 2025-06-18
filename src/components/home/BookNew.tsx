@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { cn } from '../lib/utils';
-import { API_URL } from '../lib/config';
+import { cn } from '../../lib/utils';
+import { API_URL } from '../../lib/config';
 
 interface Book {
   _id?: string;
