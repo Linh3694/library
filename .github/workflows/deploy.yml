@@ -60,7 +60,7 @@ jobs:
             fi
 
             # Install and build
-            npm ci --production
+            npm ci
             npm run build
 
             # Restart app
