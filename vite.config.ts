@@ -11,4 +11,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  preview: {
+    port: 4000,
+    host: true,
+    allowedHosts: ['library.wellspring.edu.vn'],
+  }
 })
