@@ -35,12 +35,17 @@ jobs:
         run: |
           npm run build
 
+      - name: Add production server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 42.96.40.246 >> ~/.ssh/known_hosts
+
       - name: Deploy to Production Server
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: 42.96.40.246
-          username: ${{ secrets.PRODUCTION_USER }}
+          username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PRODUCTION_PORT || 22 }}
           script: |
