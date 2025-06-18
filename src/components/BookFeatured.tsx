@@ -297,8 +297,8 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
       <div className="absolute top-16 left-40">
         <div className="flex flex-col items-start gap-4">
             <div className="flex items-center gap-4">
-          <div className="w-4 h-4 bg-[#FFCE02] rounded-full"></div>
-          <div className="w-4 h-4 bg-[#BED232] rounded-full"></div>
+          <div className="w-6 h-6 bg-[#FFCE02] rounded-full"></div>
+          <div className="w-6 h-6 bg-[#BED232] rounded-full"></div>
             </div>
           <h2 className="text-5xl font-extrabold text-[#002855]">SÁCH NỔI BẬT</h2>
         </div>

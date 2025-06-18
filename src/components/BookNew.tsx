@@ -61,7 +61,7 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
     )}>
       <div className="flex items-center gap-4 mb-[5%]">
         <div className="w-full flex flex-col px-20 items-start gap-4">
-          <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
+          <div className="w-6 h-6 bg-yellow-400 rounded-full"></div>
             <div className="w-full mx-auto flex items-center justify-between gap-4">
                 <h2 className="text-5xl font-extrabold text-[#002855]">SÁCH MỚI</h2>
                 <div className="ml-auto mr-20">

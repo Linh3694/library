@@ -1,4 +1,4 @@
-import { Header, HeroSection, BookNew, BookFeatured } from './components'
+import { Header, HeroSection, BookNew, BookFeatured, AudioBooks } from './components'
 
 function App() {
   return (
@@ -7,6 +7,7 @@ function App() {
       <HeroSection />
       <BookNew />
       <BookFeatured />
+      <AudioBooks />
     </div>
   )
 }
