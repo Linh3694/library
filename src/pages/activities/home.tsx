@@ -12,11 +12,27 @@ import {
 import { Pagination } from '../../components/ui/pagination';
 import { API_URL } from '../../lib/config';
 
-// Define LibraryActivity interface based on backend model
+// Updated LibraryActivity interface to match backend model with days
+interface ActivityDay {
+  _id?: string;
+  dayNumber: number;
+  date: string;
+  title: string;
+  description: string;
+  images: Array<{
+    _id?: string;
+    url: string;
+    caption?: string;
+    uploadedAt?: string;
+  }>;
+}
+
 interface LibraryActivity {
   _id: string;
   title: string;
+  description?: string;
   date: string;
+  days: ActivityDay[];
   images: Array<{
     _id?: string;
     url: string;
@@ -54,7 +70,33 @@ const fetchActivitiesAPI = async (page: number, limit: number): Promise<ApiRespo
     }
     
     const data = await response.json();
-    return data;
+    
+    // Filter activities: only published and with images (either in main images or in days)
+    const filteredActivities = data.activities.filter((activity: LibraryActivity) => {
+      // Kiểm tra published status trước
+      if (!activity.isPublished) {
+        return false;
+      }
+      
+      const hasMainImages = activity.images && activity.images.length > 0;
+      
+      // Kiểm tra days có published và có images không
+      const hasValidDays = activity.days && activity.days.some(day => {
+        // Có thể thêm kiểm tra published cho từng day nếu cần
+        return day.images && day.images.length > 0;
+      });
+      
+      return hasMainImages || hasValidDays;
+    });
+    
+    // Sắp xếp activities theo ngày mới nhất trước
+    filteredActivities.sort((a: LibraryActivity, b: LibraryActivity) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    return {
+      ...data,
+      activities: filteredActivities,
+      total: filteredActivities.length
+    };
   } catch (error) {
     console.error('API fetch error:', error);
     throw new Error('Không thể kết nối đến server');
@@ -68,7 +110,40 @@ const ImageModal = ({ modalState, setModalState }: {
 }) => {
   if (!modalState.isOpen || !modalState.currentActivity) return null;
 
-  const images = modalState.currentActivity.images;
+  // Get all images from both main images and days
+  const getAllImages = (activity: LibraryActivity) => {
+    const allImages: Array<{url: string, caption?: string, source: string}> = [];
+    
+    // Add main images
+    if (activity.images && activity.images.length > 0) {
+      activity.images.forEach(img => {
+        allImages.push({
+          url: img.url,
+          caption: img.caption,
+          source: 'main'
+        });
+      });
+    }
+    
+    // Add images from days
+    if (activity.days && activity.days.length > 0) {
+      activity.days.forEach(day => {
+        if (day.images && day.images.length > 0) {
+          day.images.forEach(img => {
+            allImages.push({
+              url: img.url,
+              caption: img.caption,
+              source: day.title
+            });
+          });
+        }
+      });
+    }
+    
+    return allImages;
+  };
+
+  const images = getAllImages(modalState.currentActivity);
   const currentImage = images[modalState.currentImageIndex];
 
   const handlePrevious = () => {
@@ -117,6 +192,30 @@ const ImageModal = ({ modalState, setModalState }: {
       tabIndex={0}
     >
       <div className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4">
+        {/* Navigation buttons */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePrevious();
+              }}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+            >
+              ←
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNext();
+              }}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+            >
+              →
+            </button>
+          </>
+        )}
+
         {/* Image */}
         <div className="flex flex-col items-center justify-center max-w-full max-h-full">
           <img
@@ -125,7 +224,28 @@ const ImageModal = ({ modalState, setModalState }: {
             className="max-w-full max-h-[80vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
+          
+          {/* Image info */}
+          <div className="mt-4 text-center text-white">
+            <p className="text-sm opacity-75">
+              {modalState.currentImageIndex + 1} / {images.length}
+            </p>
+            {currentImage.caption && (
+              <p className="text-sm mt-1">{currentImage.caption}</p>
+            )}
+            <p className="text-xs opacity-60 mt-1">
+              Từ: {currentImage.source}
+            </p>
+          </div>
         </div>
+
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+        >
+          ×
+        </button>
       </div>
     </div>
   );
@@ -210,20 +330,11 @@ const ActivitiesHomePage = () => {
     return date.toLocaleDateString('vi-VN');
   };
 
-  // Group images by date (mock implementation for demo)
-  const getImagesByDate = (activity: LibraryActivity) => {
-    const images = activity.images.map((img: { url: string; caption?: string }) => img.url);
-    return {
-      date1: images.slice(0, 4),
-      date2: images.slice(4, 8)
-    };
-  };
-
-  // Handle image click
-  const handleImageClick = (activity: LibraryActivity, imageIndex: number) => {
+  // Handle image click with global index across all images
+  const handleImageClick = (activity: LibraryActivity, globalImageIndex: number) => {
     setModalState({
       isOpen: true,
-      currentImageIndex: imageIndex,
+      currentImageIndex: globalImageIndex,
       currentActivity: activity
     });
   };
@@ -264,7 +375,7 @@ const ActivitiesHomePage = () => {
                 <div className="space-y-12 ml-[5%]">
                   {/* Render each activity */}
                   {activities.map((activity) => {
-                    const imageGroups = getImagesByDate(activity);
+                    let globalImageIndex = 0;
                     
                     return (
                       <div key={activity._id} className="space-y-6 pb-[10%]">
@@ -273,60 +384,103 @@ const ActivitiesHomePage = () => {
                           {activity.title}
                         </h2>
                         
-                        {/* Images with dates */}
-                        <div className="space-y-4 ml-[10%]">
-                          {/* First row of images with date */}
-                          {imageGroups.date1.length > 0 && (
+                        {/* Activity Description */}
+                        {activity.description && (
+                          <p className="text-gray-600 text-left ml-[10%]">
+                            {activity.description}
+                          </p>
+                        )}
+                        
+                        {/* Main images (backward compatibility) */}
+                        {activity.images && activity.images.length > 0 && (
+                          <div className="space-y-4 ml-[10%]">
                             <div className="flex gap-6 items-start">
                               <div className="w-20 flex-shrink-0">
                                 <p className="text-sm text-[#757575] font-medium">{formatDate(activity.date)}</p>
                               </div>
                               <div className="flex-1">
                                 <div className="grid grid-cols-4 gap-4">
-                                  {imageGroups.date1.map((image: string, index: number) => (
-                                    <div 
-                                      key={index} 
-                                      className="aspect-[4/3] rounded-4xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                                      onClick={() => handleImageClick(activity, index)}
-                                    >
-                                      <img
-                                        src={image}
-                                        alt={`${activity.title} ${index + 1}`}
-                                        className="w-full h-full object-cover"
-                                      />
-                                    </div>
-                                  ))}
+                                  {activity.images.map((image, index) => {
+                                    const currentGlobalIndex = globalImageIndex++;
+                                    return (
+                                      <div 
+                                        key={index} 
+                                        className="aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                        onClick={() => handleImageClick(activity, currentGlobalIndex)}
+                                      >
+                                        <img
+                                          src={image.url}
+                                          alt={image.caption || `${activity.title} ${index + 1}`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </div>
-                          )}
-                          
-                          {/* Second row of images with different date */}
-                          {imageGroups.date2.length > 0 && (
-                            <div className="flex gap-6 items-start">
-                              <div className="w-20 flex-shrink-0">
-                                <p className="text-sm text-[#757575] font-medium">{formatDate(activity.date)}</p>
-                              </div>
-                              <div className="flex-1">
-                                <div className="grid grid-cols-4 gap-4">
-                                  {imageGroups.date2.map((image: string, index: number) => (
-                                    <div 
-                                      key={index + 4} 
-                                      className="aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                                      onClick={() => handleImageClick(activity, index + 4)}
-                                    >
-                                      <img
-                                        src={image}
-                                        alt={`${activity.title} ${index + 5}`}
-                                        className="w-full h-full object-cover"
-                                      />
+                          </div>
+                        )}
+                        
+                        {/* Days with images - Hiển thị theo ngày */}
+                        {activity.days && activity.days.length > 0 && (
+                          <div className="space-y-8 ml-[10%]">
+                            {activity.days
+                              // Sắp xếp days theo ngày
+                              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                              // Chỉ hiển thị days có images
+                              .filter(day => day.images && day.images.length > 0)
+                              .map((day) => (
+                                <div key={day._id || day.dayNumber} className="space-y-4">
+                                  {/* Day Header với ngày, tiêu đề và ảnh song song */}
+                                  <div className="flex gap-6 items-start">
+                                    <div className="w-24 flex-shrink-0">
+                                      <div className=" text-[#757575] text-end">
+                                        <p className="text-sm font-semibold"> {day.title}</p>
+                                        <p className="text-sm font-semibold">{formatDate(day.date)}</p>
+                                      </div>
                                     </div>
-                                  ))}
+                                   {/* Day Images Grid - song song với title và date */}
+                                    <div className="flex-1">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                        {day.images.map((image, index) => {
+                                          const currentGlobalIndex = globalImageIndex++;
+                                          return (
+                                            <div 
+                                              key={index} 
+                                              className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105"
+                                              onClick={() => handleImageClick(activity, currentGlobalIndex)}
+                                            >
+                                              <img
+                                                src={image.url}
+                                                alt={image.caption || `${day.title} - Ảnh ${index + 1}`}
+                                                className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-110"
+                                                loading="lazy"
+                                              />
+                                              {/* Overlay hiển thị khi hover */}
+                                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                                  </svg>
+                                                </div>
+                                              </div>
+                                              {/* Caption overlay */}
+                                              {image.caption && (
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                                                  <p className="text-white text-xs font-medium">{image.caption}</p>
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                              ))}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
