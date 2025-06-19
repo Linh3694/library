@@ -7,7 +7,9 @@ interface Book {
   generatedCode?: string;
   bookTitle: string;
   isbn: string;
-  isNewBook: boolean;
+  isNewBook?: boolean; // Từ library level
+  isFeaturedBook?: boolean; // Từ library level
+  isAudioBook?: boolean; // Từ library level
   libraryId: string;
   libraryTitle?: string;
   authors?: string[];
@@ -130,7 +132,13 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
           ) : (
             // No books found
             <div className="w-full text-center py-20">
-              <p className="text-gray-500 text-lg">Chưa có sách nổi bật nào</p>
+              <div className="flex flex-col items-center">
+                <svg className="w-16 h-16 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                </svg>
+                <p className="text-gray-500 text-lg mb-2">Chưa có sách nổi bật nào</p>
+                <p className="text-gray-400 text-sm">Vui lòng thêm Library với isFeaturedBook: true để hiển thị sách nổi bật</p>
+              </div>
             </div>
           )}
         </div>

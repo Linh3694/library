@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../lib/utils';
-import { API_URL } from '../../lib/config';
+import { API_URL, BASE_URL } from '../../lib/config';
 
 interface AudioBook {
   _id?: string;
   generatedCode?: string;
   bookTitle: string;
   isbn: string;
-  isAudioBook: boolean;
+  isAudioBook: boolean; // Lấy từ library level
   libraryId: string;
   libraryTitle?: string;
   authors?: string[];
@@ -17,6 +17,9 @@ interface AudioBook {
   duration?: string; // Thời lượng sách nói
   narrator?: string; // Người đọc
   rating?: number;
+  borrowCount?: number;
+  isNewBook?: boolean; // Từ library level
+  isFeaturedBook?: boolean; // Từ library level
 }
 
 interface AudioBooksProps {
@@ -180,7 +183,7 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                   <path d="M12 2C13.1 2 14 2.9 14 4V10C14 11.1 13.1 12 12 12C10.9 12 10 11.1 10 10V4C10 2.9 10.9 2 12 2M19 10V12C19 15.3 16.3 18 13 18V20H11V18C7.7 18 5 15.3 5 12V10H7V12C7 14.2 8.8 16 11 16H13C15.2 16 17 14.2 17 12V10H19Z"/>
                 </svg>
                 <p className="text-gray-500 text-lg mb-2">Chưa có sách nói nào</p>
-                <p className="text-gray-400 text-sm">Vui lòng thêm sách với isAudioBook: true trong database</p>
+                <p className="text-gray-400 text-sm">Vui lòng thêm Library với isAudioBook: true để hiển thị sách nói</p>
               </div>
             </div>
           )}

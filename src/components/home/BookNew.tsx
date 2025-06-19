@@ -7,7 +7,9 @@ interface Book {
   generatedCode?: string;
   bookTitle: string;
   isbn: string;
-  isNewBook: boolean;
+  isNewBook?: boolean; // Từ library level
+  isFeaturedBook?: boolean; // Từ library level
+  isAudioBook?: boolean; // Từ library level
   libraryId: string;
   libraryTitle?: string;
   authors?: string[];
@@ -131,10 +133,12 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
                   </svg>
                 </div>
 
-                {/* New Badge */}
-                <div className="absolute top-2 left-2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  MỚI
-                </div>
+                {/* New Badge - Chỉ hiển thị khi isNewBook = true */}
+                {book.isNewBook && (
+                  <div className="absolute top-2 left-2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    MỚI
+                  </div>
+                )}
               </div>
 
               {/* Book Info */}
@@ -161,7 +165,13 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
         ) : (
           // No books found
           <div className="w-full text-center py-20">
-            <p className="text-gray-500 text-lg">Chưa có sách mới nào</p>
+            <div className="flex flex-col items-center">
+              <svg className="w-16 h-16 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3M19 19H5V5H19V19Z"/>
+              </svg>
+              <p className="text-gray-500 text-lg mb-2">Chưa có sách mới nào</p>
+              <p className="text-gray-400 text-sm">Vui lòng thêm Library với isNewBook: true để hiển thị sách mới</p>
+            </div>
           </div>
         )}
       </div>
