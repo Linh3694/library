@@ -9,6 +9,8 @@ interface NewLibrary {
   authors?: string[];
   category?: string;
   coverImage?: string;
+  seriesName?: string;
+  documentType?: string;
   isNewBook?: boolean;
   isFeaturedBook?: boolean;
   isAudioBook?: boolean;
@@ -56,6 +58,8 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
           authors?: string[]; 
           category?: string; 
           coverImage?: string; 
+          seriesName?: string;
+          documentType?: string;
           isNewBook?: boolean; 
           isFeaturedBook?: boolean; 
           isAudioBook?: boolean;
@@ -72,6 +76,8 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
               authors: book.authors,
               category: book.category,
               coverImage: book.coverImage,
+              seriesName: book.seriesName,
+              documentType: book.documentType,
               isNewBook: book.isNewBook || false,
               isFeaturedBook: book.isFeaturedBook,
               isAudioBook: book.isAudioBook,
@@ -171,19 +177,14 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
                       <div className="text-xs text-gray-600 font-medium uppercase tracking-wide">
                         {library.title}
                       </div>
-                      {library.totalBooks && (
-                        <div className="text-xs mt-1 opacity-90">
-                          {library.totalBooks} quyển
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
 
                 {/* Arrow Icon */}
-                <div className="absolute -top-2 -right-10 bg-[#f6f6f6] rounded-full p-2 shadow text-gray-500">
+                <div className="absolute -top-2 -right-12 bg-[#f6f6f6] rounded-full p-2 shadow text-gray-500 flex items-center justify-center">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </div>
 
@@ -193,32 +194,21 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
                     MỚI
                   </div>
                 )}
-                
-                {/* Library Stats Badge */}
-                <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
-                  {library.totalBooks || 1} quyển
-                </div>
+    
+            
               </div>
 
               {/* Library Info */}
-              <div className="w-full text-center">
+              <div className="w-full text-center pt-5">
                 <p className="text-sm font-bold uppercase text-[#002855] mt-2">
                   {library.title}
                 </p>
-                <div className="mt-12">
+                <div className="mt-10">
                   <p className="text-sm font-semibold text-[#757575]">
-                    {library.authors?.join(", ") || "Tác giả đa dạng"}
+                    {library.authors?.join(", ") || "Chưa có thông tin tác giả"}
                   </p>
                   <p className="text-sm font-semibold text-[#757575]">
-                    {library.category || "Chủ đề đa dạng"}
-                  </p>
-                  {library.publishYear && (
-                    <p className="text-xs text-[#999999] mt-1">
-                      Năm XB: {library.publishYear}
-                    </p>
-                  )}
-                  <p className="text-xs text-[#999999] mt-1">
-                    {library.totalBooks || 1} quyển sách
+                    {library.documentType || "Chủ đề đa dạng"}
                   </p>
                 </div>
               </div>
