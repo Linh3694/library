@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { cn, createSlug, getImageUrl } from '../../lib/utils';
-import { libraryAPI } from '../../lib/api';
+import { cn } from '../../lib/utils';
+import { createSlug, getImageUrl } from '../../lib/utils';
+import { libraryAPI, type Library } from '../../lib/api';
 
 interface AudioLibrary {
   _id?: string;
@@ -34,21 +35,7 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
         const libraries = await libraryAPI.getAudioBooks(4);
         
         // Chuyển đổi libraries sang format của AudioLibrary interface
-        const audioLibrariesData = libraries.map((library: {
-          _id?: string;
-          libraryId: string;
-          libraryCode?: string;
-          title: string;
-          authors?: string[];
-          category?: string;
-          coverImage?: string;
-          isAudioBook: boolean;
-          isNewBook?: boolean;
-          isFeaturedBook?: boolean;
-          totalBooks?: number;
-          rating?: number;
-          borrowCount?: number;
-        }) => ({
+        const audioLibrariesData = libraries.map((library: Library) => ({
           _id: library._id || library.libraryId,
           libraryCode: library.libraryCode,
           title: library.title,
