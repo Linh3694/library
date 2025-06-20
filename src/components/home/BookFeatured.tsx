@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn, createSlug, getImageUrl } from '../../lib/utils';
 import { libraryAPI, type Library } from '../../lib/api';
 
@@ -24,6 +24,7 @@ interface BookFeaturedProps {
 }
 
 const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
+  const navigate = useNavigate();
   const [featuredLibraries, setFeaturedLibraries] = useState<FeaturedLibrary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -171,10 +172,13 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
         </div>
 
         {/* Center Section - Discover Circle */}
-        <div className="flex-1 flex justify-start items-center pt-[15%]">
+        <div className="flex-1 flex justify-start items-center pt-[15%] hover:scale-105 transition-transform duration-300">
           <div className="relative">
             {/* Main Circle */}
-            <div className="w-80 h-80 rounded-full border-4 border-[#F05023] flex items-center justify-center bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer group">
+            <div 
+              className="w-80 h-80 rounded-full border-4 border-[#F05023] flex items-center justify-center bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer group"
+              onClick={() => navigate('/library')}
+            >
               <div className="text-center">
                 <h3 className="text-4xl font-extrabold text-[#F05023]">
                   KHÁM PHÁ
