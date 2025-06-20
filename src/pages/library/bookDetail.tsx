@@ -63,6 +63,7 @@ interface RelatedBook {
   coverImage?: string;
   borrowCount?: number;
   totalBorrowCount?: number;
+  isAudioBook?: boolean;
 }
 
 const BookDetailPage = () => {
@@ -475,13 +476,13 @@ const BookDetailPage = () => {
           
           <div className="grid grid-cols-5 gap-6 mb-8">
             {currentRelatedBooks.map((book) => (
-              <div key={book._id} className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm p-10">
-                <div className="aspect-[2/3] flex justify-center items-center">
+              <div key={book._id} className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm p-8">
+                <div className="aspect-[4/5] flex justify-center items-center">
                   {book.coverImage ? (
                     <img
                       src={getImageUrl(book.coverImage)}
                       alt={book.title}
-                      className="w-[80%] h-[80%] object-cover"
+                      className="w-[80%] h-[90%] object-cover shadow-lg"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center rounded-lg">
@@ -500,19 +501,19 @@ const BookDetailPage = () => {
                   </p>
                   <h3 className="font-semibold text-sm line-clamp-2">{book.title}</h3>
                   
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3 text-xs">
-                      {book.totalBorrowCount || book.borrowCount || 0} lượt
-                    </Button>
-                    <div className="flex gap-1 ml-auto">
-                      <div className="w-4 h-4 bg-orange-400 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs">★</span>
+                 <div className="flex gap-1 pt-10 items-center justify-between">
+                        <div>
+                        <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3">
+                          Mở rộng
+                        </Button>
+                       </div>
+                          {book.isAudioBook && (
+                           <div className="flex items-center gap-1">
+                             <img src="/play.svg" alt="Play" className="w-4 h-4" />
+                             <img src="/micro.svg" alt="Microphone" className="w-4 h-4" />
+                           </div>
+                         )}
                       </div>
-                      <div className="w-4 h-4 bg-orange-400 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs">♥</span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             ))}

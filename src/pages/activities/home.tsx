@@ -10,48 +10,7 @@ import {
   BreadcrumbPage,
 } from '../../components/ui/breadcrumb';
 import { Pagination } from '../../components/ui/pagination';
-import { API_URL } from '../../lib/config';
-
-// Updated LibraryActivity interface to match backend model with days
-interface ActivityDay {
-  _id?: string;
-  dayNumber: number;
-  date: string;
-  title: string;
-  description: string;
-  images: Array<{
-    _id?: string;
-    url: string;
-    caption?: string;
-    uploadedAt?: string;
-  }>;
-}
-
-interface LibraryActivity {
-  _id: string;
-  title: string;
-  description?: string;
-  date: string;
-  days: ActivityDay[];
-  images: Array<{
-    _id?: string;
-    url: string;
-    caption?: string;
-    uploadedAt?: string;
-  }>;
-  isPublished: boolean;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// API response interface
-interface ApiResponse {
-  activities: LibraryActivity[];
-  totalPages: number;
-  currentPage: number;
-  total: number;
-}
+import { libraryAPI, type LibraryActivity, type ActivitiesApiResponse } from '../../lib/api';
 
 // Modal state interface
 interface ModalState {
@@ -60,47 +19,9 @@ interface ModalState {
   currentActivity: LibraryActivity | null;
 }
 
-// Real API function to fetch activities
-const fetchActivitiesAPI = async (page: number, limit: number): Promise<ApiResponse> => {
-  try {
-    const response = await fetch(`${API_URL}/library-activities?page=${page}&limit=${limit}&sortBy=date`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Filter activities: only published and with images (either in main images or in days)
-    const filteredActivities = data.activities.filter((activity: LibraryActivity) => {
-      // Kiểm tra published status trước
-      if (!activity.isPublished) {
-        return false;
-      }
-      
-      const hasMainImages = activity.images && activity.images.length > 0;
-      
-      // Kiểm tra days có published và có images không
-      const hasValidDays = activity.days && activity.days.some(day => {
-        // Có thể thêm kiểm tra published cho từng day nếu cần
-        return day.images && day.images.length > 0;
-      });
-      
-      return hasMainImages || hasValidDays;
-    });
-    
-    // Sắp xếp activities theo ngày mới nhất trước
-    filteredActivities.sort((a: LibraryActivity, b: LibraryActivity) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
-    return {
-      ...data,
-      activities: filteredActivities,
-      total: filteredActivities.length
-    };
-  } catch (error) {
-    console.error('API fetch error:', error);
-    throw new Error('Không thể kết nối đến server');
-  }
+// Real API function to fetch activities - sử dụng libraryAPI
+const fetchActivitiesAPI = async (page: number, limit: number): Promise<ActivitiesApiResponse> => {
+  return await libraryAPI.getActivities(page, limit);
 };
 
 // Image Modal Component

@@ -25,19 +25,30 @@ export function createSlug(title: string): string {
 
 // Helper function để xử lý đường dẫn ảnh
 export const getImageUrl = (imagePath: string | undefined | null): string | undefined => {
-  if (!imagePath) return undefined;
+  if (!imagePath || imagePath.trim() === '') {
+    return undefined;
+  }
+  
+  const cleanPath = imagePath.trim();
   
   // Nếu đã là URL đầy đủ (bắt đầu với http), trả về as-is
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
+  if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
+    return cleanPath;
   }
   
   // Nếu bắt đầu với '/', đây là static asset từ public folder
-  if (imagePath.startsWith('/')) {
-    return imagePath;
+  if (cleanPath.startsWith('/')) {
+    return cleanPath;
   }
   
   // Ngược lại, đây là file từ server uploads, thêm BASE_URL
   const BASE_URL = 'https://api-dev.wellspring.edu.vn';
-  return `${BASE_URL}/${imagePath}`;
+  
+  // Đảm bảo không có double slash
+  const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+  const finalUrl = `${BASE_URL}${finalPath}`;
+  
+  console.log('🖼️ [getImageUrl] Processing:', { imagePath, cleanPath, finalUrl });
+  
+  return finalUrl;
 };

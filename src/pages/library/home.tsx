@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import { createSlug } from '../../lib/utils';
+import { createSlug, getImageUrl } from '../../lib/utils';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import {
@@ -47,6 +47,57 @@ const getUniqueGenres = (books: Library[]) => {
   return ['Tất cả', ...Array.from(genres)];
 };
 
+// Component Image wrapper để handle loading state
+const BookImage = ({ 
+  src, 
+  alt, 
+  fallback, 
+  className 
+}: { 
+  src: string | undefined, 
+  alt: string, 
+  fallback: string, 
+  className: string 
+}) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentSrc, setCurrentSrc] = useState(src || fallback);
+
+  useEffect(() => {
+    setCurrentSrc(src || fallback);
+    setIsLoading(true);
+  }, [src, fallback]);
+
+  const handleLoad = () => {
+    setIsLoading(false);
+  };
+
+  const handleError = () => {
+    console.error('❌ Image failed to load:', src);
+    console.error('❌ Processed URL:', getImageUrl(src));
+    setIsLoading(false);
+    if (currentSrc !== fallback) {
+      setCurrentSrc(fallback);
+    }
+  };
+
+  return (
+    <div className="relative w-full h-full">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+      )}
+      <img
+        src={currentSrc}
+        alt={alt}
+        className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+        onLoad={handleLoad}
+        onError={handleError}
+      />
+    </div>
+  );
+};
+
 const LibraryHomePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
@@ -70,11 +121,11 @@ const LibraryHomePage = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await libraryAPI.getAllBooks();
+        const data = await libraryAPI.getAllLibraries();
         setBooks(data);
       } catch (err) {
-        console.error('Error fetching books:', err);
-        setError('Không thể tải dữ liệu sách. Vui lòng thử lại.');
+        console.error('Error fetching libraries:', err);
+        setError('Không thể tải dữ liệu thư viện. Vui lòng thử lại.');
       } finally {
         setLoading(false);
       }
@@ -89,20 +140,21 @@ const LibraryHomePage = () => {
     // The actual filtering happens in filteredBooks
   };
 
-  const filteredBooks = books.filter((book: Library) => {
-    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         book.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredBooks = books.filter((library: Library) => {
+    const matchesSearch = library.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         library.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === 'Tất cả' || 
-                           book.category?.includes(selectedCategory) || 
-                           book.documentType?.includes(selectedCategory);
+                           library.category?.includes(selectedCategory) || 
+                           library.documentType?.includes(selectedCategory);
     const matchesGenre = selectedGenre === 'Tất cả' || 
-                        book.category?.includes(selectedGenre) || 
-                        book.documentType?.includes(selectedGenre);
+                        library.category?.includes(selectedGenre) || 
+                        library.documentType?.includes(selectedGenre) ||
+                        library.seriesName?.includes(selectedGenre);
     
     return matchesSearch && matchesCategory && matchesGenre;
   });
 
-  // Sắp xếp sách
+  // Sắp xếp thư viện
   const sortedBooks = [...filteredBooks].sort((a: Library, b: Library) => {
     switch (sortBy) {
       case 'Cũ nhất':
@@ -125,8 +177,8 @@ const LibraryHomePage = () => {
     currentPage * booksPerPage
   );
 
-  const featuredBook = currentBooks.find((book: Library) => book.isFeaturedBook) || currentBooks[0];
-  const regularBooks = currentBooks.filter((book: Library) => book._id !== featuredBook?._id);
+  const featuredBook = currentBooks.find((library: Library) => library.isFeaturedBook) || currentBooks[0];
+  const regularBooks = currentBooks.filter((library: Library) => library._id !== featuredBook?._id);
 
   // Tạo danh sách categories và genres từ dữ liệu
   const categories = getUniqueCategories(books);
@@ -223,7 +275,7 @@ const LibraryHomePage = () => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 pb-[10%]">
             {/* Search Bar */}
             <div className="mb-4">
               <div className="flex gap-3 items-center justify-center">
@@ -286,7 +338,7 @@ const LibraryHomePage = () => {
               </div>
             ) : books.length === 0 && !loading && !error ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">Chưa có sách nào trong thư viện</p>
+                <p className="text-gray-500">Chưa có thư viện nào</p>
               </div>
             ) : currentBooks.length > 0 ? (
               <div className="grid grid-cols-4 gap-8">
@@ -294,25 +346,36 @@ const LibraryHomePage = () => {
                 {featuredBook && (
                     <Link 
                       to={`/library/book/${createSlug(featuredBook.title)}`}
-                      className="col-span-2 row-span-2 bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[15%] py-[5%]">
-                     <div className="aspect-[5/6] pt-[5%] pb-[3%] relative flex justify-center items-center">
-                      <img
-                        src={featuredBook.coverImage || '/hero-01.jpg'}
+                      className="col-span-2 row-span-2 bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[10%] py-[5%]">
+                     <div className="aspect-[5/6] pt-[5%] pb-5 relative flex justify-center items-center">
+                      <BookImage
+                        src={getImageUrl(featuredBook.coverImage)}
                         alt={featuredBook.title}
-                        className="w-[80%] h-full object-cover"
-                      />
+                        fallback="/hero-01.jpg"
+                        className="w-[80%] h-full object-cover mx-auto shadow-lg"
+                      />                     
                     </div>
                     <div className="pb-4 px-10">
                       <p className="text-sm text-[#757575] mb-1">{featuredBook.authors.join(', ')}</p>
                       <h3 className="font-bold text-lg mb-2 line-clamp-2">{featuredBook.title}</h3>
-                      <p className="text-sm text-[#757575] mb-3" style={{ fontStyle: 'italic' }}>{featuredBook.category || featuredBook.documentType}</p>
+                      <p className="text-sm text-[#757575] mb-3" style={{ fontStyle: 'italic' }}>
+                        {featuredBook.isAudioBook ? `${featuredBook.category || featuredBook.documentType}` : (featuredBook.category || featuredBook.documentType)}
+                      </p>
                       <p className="text-xs text-[#757575] line-clamp-3 mb-4">
                         {featuredBook.description?.content || 'Chưa có mô tả'}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1 items-center justify-between">
+                        <div>
                         <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3">
                           Xem giới thiệu
                         </Button>
+                       </div>
+                          {featuredBook.isAudioBook && (
+                           <div className="flex items-center gap-1">
+                             <img src="/play.svg" alt="Play" className="w-4 h-4" />
+                             <img src="/micro.svg" alt="Microphone" className="w-4 h-4" />
+                           </div>
+                         )}
                       </div>
                     </div>
                   </Link>
@@ -323,23 +386,31 @@ const LibraryHomePage = () => {
                 <Link 
                   key={book._id} 
                   to={`/library/book/${createSlug(book.title)}`}
-                  className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[20%] py-[5%]">
-                     <div className="aspect-[5/6] pt-[8%] pb-[4%] relative flex justify-center items-center">
-                      <img
-                        src={book.coverImage || '/hero-02.jpg'}
+                  className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[20%] py-[10%]">
+                     <div className="aspect-[5/6] pt-[8%] pb-[7%] relative flex justify-center items-center">
+                      <BookImage
+                        src={getImageUrl(book.coverImage)}
                         alt={book.title}
-                        className="w-[80%] h-[90%] object-cover"
+                        fallback="/hero-02.jpg"
+                        className="w-[80%] h-full object-cover mx-auto shadow-lg"
                       />
+      
                     </div>
-                    <div className="pb-0 space-y-3">
-                      <p className="text-xs text-[#757575]">{book.authors.join(', ')}</p>
-                      <h3 className="font-semibold text-sm  line-clamp-2">{book.title}</h3>
-                      <p className="text-xs text-[#757575]" style={{ fontStyle: 'italic' }}>{book.category || book.documentType}</p>
-                      <div className="flex gap-1">
+                    <div className="space-y-3">
+                      <p className="text-sm text-[#757575]">{book.authors.join(', ')}</p>
+                      <h3 className="font-semibold text-lg line-clamp-2">{book.title}</h3>
+                      <div className="flex gap-1 pt-10 items-center justify-between">
+                        <div>
                         <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3">
                           Mở rộng
                         </Button>
-                       
+                       </div>
+                          {book.isAudioBook && (
+                           <div className="flex items-center gap-1">
+                             <img src="/play.svg" alt="Play" className="w-4 h-4" />
+                             <img src="/micro.svg" alt="Microphone" className="w-4 h-4" />
+                           </div>
+                         )}
                       </div>
                     </div>
                   </Link>
@@ -347,7 +418,7 @@ const LibraryHomePage = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500">Không tìm thấy sách nào phù hợp</p>
+                <p className="text-gray-500">Không tìm thấy thư viện nào phù hợp</p>
               </div>
             )}
 
