@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -23,50 +23,29 @@ import {
 import { Input } from '../../components/ui/input';
 import { Checkbox } from '../../components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, Loader2 } from 'lucide-react';
 import { Pagination } from '../../components/ui/pagination';
+import { libraryAPI, type Library } from '../../lib/api';
 
-// Mock data cho sách
-const mockBooks = [
-  {
-    id: 1,
-    title: "TƯƠNG LAI SAU ĐẠI DÍCH COVID",
-    author: "Jason Schenker",
-    description: "Những kỳ vọng của một nhà tương lai học về các địa điểm, thách thức và kể cả kịch bản tốt đặc và những cơ hội mới chứa từng có.",
-    category: "Thảm hiểm, Trinh suy",
-    image: "/hero-01.jpg", // Sử dụng ảnh có sẵn
-    isFeatured: true
-  },
-  // Thêm 19 sách khác để có đủ 20 sách
-  ...Array.from({ length: 19 }, (_, i) => ({
-    id: i + 2,
-    title: `TƯƠNG LAI SAU ĐẠI DÍCH COVID`,
-    author: "Jason Schenker",
-    description: "Mô tả ngắn gọn về cuốn sách này...",
-    category: "Thảm hiểm, Trinh suy",
-    image: "/hero-02.jpg",
-    isFeatured: false
-  }))
-];
+// Tạo categories và genres từ dữ liệu thực
+const getUniqueCategories = (books: Library[]) => {
+  const categories = new Set<string>();
+  books.forEach(book => {
+    if (book.category) categories.add(book.category);
+    if (book.documentType) categories.add(book.documentType);
+  });
+  return ['Tất cả', ...Array.from(categories)];
+};
 
-const categories = [
-  "Tất cả",
-  "Giáo khoa sách",
-  "Sách nội",
-  "Văn học",
-  "Khoa học",
-  "Lịch sử",
-  "Nghệ thuật"
-];
-
-const genres = [
-  "Tất cả",
-  "Tiểu thuyết",
-  "Truyện tranh",
-  "Sách giáo khoa",
-  "Tham khảo",
-  "Nghiên cứu"
-];
+const getUniqueGenres = (books: Library[]) => {
+  const genres = new Set<string>();
+  books.forEach(book => {
+    if (book.category) genres.add(book.category);
+    if (book.documentType) genres.add(book.documentType);
+    if (book.seriesName) genres.add(book.seriesName);
+  });
+  return ['Tất cả', ...Array.from(genres)];
+};
 
 const LibraryHomePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,12 +55,33 @@ const LibraryHomePage = () => {
   const [sortBy, setSortBy] = useState('Mới nhất');
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isGenreOpen, setIsGenreOpen] = useState(true);
+  
+  // Thêm state cho API data
+  const [books, setBooks] = useState<Library[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const booksPerPage = 20;
-  const totalBooks = mockBooks.length;
-  const totalPages = Math.ceil(totalBooks / booksPerPage);
-
   const sortOptions = ['Mới nhất', 'Cũ nhất', 'A-Z', 'Z-A'];
+
+  // Load dữ liệu từ API
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await libraryAPI.getAllBooks();
+        setBooks(data);
+      } catch (err) {
+        console.error('Error fetching books:', err);
+        setError('Không thể tải dữ liệu sách. Vui lòng thử lại.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   const handleSearch = () => {
     // Reset current page when searching
@@ -89,22 +89,48 @@ const LibraryHomePage = () => {
     // The actual filtering happens in filteredBooks
   };
 
-  const filteredBooks = mockBooks.filter(book => {
+  const filteredBooks = books.filter((book: Library) => {
     const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         book.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'Tất cả' || book.category.includes(selectedCategory);
-    const matchesGenre = selectedGenre === 'Tất cả' || book.category.includes(selectedGenre);
+                         book.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = selectedCategory === 'Tất cả' || 
+                           book.category?.includes(selectedCategory) || 
+                           book.documentType?.includes(selectedCategory);
+    const matchesGenre = selectedGenre === 'Tất cả' || 
+                        book.category?.includes(selectedGenre) || 
+                        book.documentType?.includes(selectedGenre);
     
     return matchesSearch && matchesCategory && matchesGenre;
   });
 
-  const currentBooks = filteredBooks.slice(
+  // Sắp xếp sách
+  const sortedBooks = [...filteredBooks].sort((a: Library, b: Library) => {
+    switch (sortBy) {
+      case 'Cũ nhất':
+        return (a.publishYear || 0) - (b.publishYear || 0);
+      case 'A-Z':
+        return a.title.localeCompare(b.title);
+      case 'Z-A':
+        return b.title.localeCompare(a.title);
+      case 'Mới nhất':
+      default:
+        return (b.publishYear || 0) - (a.publishYear || 0);
+    }
+  });
+
+  const totalBooks = sortedBooks.length;
+  const totalPages = Math.ceil(totalBooks / booksPerPage);
+
+  const currentBooks = sortedBooks.slice(
     (currentPage - 1) * booksPerPage,
     currentPage * booksPerPage
   );
 
-  const featuredBook = currentBooks.find(book => book.isFeatured) || currentBooks[0];
-  const regularBooks = currentBooks.filter(book => book.id !== featuredBook?.id);
+  const featuredBook = currentBooks.find((book: Library) => book.isFeaturedBook) || currentBooks[0];
+  const regularBooks = currentBooks.filter((book: Library) => book._id !== featuredBook?._id);
+
+  // Tạo danh sách categories và genres từ dữ liệu
+  const categories = getUniqueCategories(books);
+  const genres = getUniqueGenres(books);
 
   return (
     <div className="min-h-screen bg-white">
@@ -146,7 +172,7 @@ const LibraryHomePage = () => {
                     value={selectedCategory}
                     onValueChange={setSelectedCategory}
                   >
-                    {categories.map((category) => (
+                    {categories.map((category: string) => (
                       <div key={category} className="flex items-center space-x-2">
                         <RadioGroupItem value={category} id={`category-${category}`} />
                         <label
@@ -174,7 +200,7 @@ const LibraryHomePage = () => {
                 </h3>
                 {isGenreOpen && (
                   <div className="space-y-3">
-                    {genres.map((genre) => (
+                    {genres.map((genre: string) => (
                       <div key={genre} className="flex items-center space-x-3">
                         <Checkbox
                           id={`genre-${genre}`}
@@ -242,7 +268,27 @@ const LibraryHomePage = () => {
               </div>
             </div>
 
-            {currentBooks.length > 0 ? (
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-[#002855]" />
+                <span className="ml-2 text-[#002855]">Đang tải dữ liệu...</span>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-red-500">{error}</p>
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  className="mt-4"
+                  variant="outline"
+                >
+                  Thử lại
+                </Button>
+              </div>
+            ) : books.length === 0 && !loading && !error ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Chưa có sách nào trong thư viện</p>
+              </div>
+            ) : currentBooks.length > 0 ? (
               <div className="grid grid-cols-4 gap-8">
                 {/* Featured Book - Chiếm 2 hàng */}
                 {featuredBook && (
@@ -251,17 +297,17 @@ const LibraryHomePage = () => {
                       className="col-span-2 row-span-2 bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[15%] py-[5%]">
                      <div className="aspect-[5/6] pt-[5%] pb-[3%] relative flex justify-center items-center">
                       <img
-                        src={featuredBook.image}
+                        src={featuredBook.coverImage || '/hero-01.jpg'}
                         alt={featuredBook.title}
                         className="w-[80%] h-full object-cover"
                       />
                     </div>
                     <div className="pb-4 px-10">
-                      <p className="text-sm text-[#757575] mb-1">{featuredBook.author}</p>
+                      <p className="text-sm text-[#757575] mb-1">{featuredBook.authors.join(', ')}</p>
                       <h3 className="font-bold text-lg mb-2 line-clamp-2">{featuredBook.title}</h3>
-                      <p className="text-sm text-[#757575] mb-3" style={{ fontStyle: 'italic' }}>{featuredBook.category}</p>
+                      <p className="text-sm text-[#757575] mb-3" style={{ fontStyle: 'italic' }}>{featuredBook.category || featuredBook.documentType}</p>
                       <p className="text-xs text-[#757575] line-clamp-3 mb-4">
-                        {featuredBook.description}
+                        {featuredBook.description?.content || 'Chưa có mô tả'}
                       </p>
                       <div className="flex gap-2">
                         <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3">
@@ -273,22 +319,22 @@ const LibraryHomePage = () => {
                 )}
 
                 {/* Regular Books - Grid 4 cột */}
-                {regularBooks.map((book) => (
+                {regularBooks.map((book: Library) => (
                 <Link 
-                  key={book.id} 
+                  key={book._id} 
                   to={`/library/book/${createSlug(book.title)}`}
                   className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[20%] py-[5%]">
                      <div className="aspect-[5/6] pt-[8%] pb-[4%] relative flex justify-center items-center">
                       <img
-                        src={book.image}
+                        src={book.coverImage || '/hero-02.jpg'}
                         alt={book.title}
                         className="w-[80%] h-[90%] object-cover"
                       />
                     </div>
                     <div className="pb-0 space-y-3">
-                      <p className="text-xs text-[#757575]">{book.author}</p>
+                      <p className="text-xs text-[#757575]">{book.authors.join(', ')}</p>
                       <h3 className="font-semibold text-sm  line-clamp-2">{book.title}</h3>
-                      <p className="text-xs text-[#757575]" style={{ fontStyle: 'italic' }}>{book.category}</p>
+                      <p className="text-xs text-[#757575]" style={{ fontStyle: 'italic' }}>{book.category || book.documentType}</p>
                       <div className="flex gap-1">
                         <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3">
                           Mở rộng

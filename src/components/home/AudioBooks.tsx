@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { cn, createSlug } from '../../lib/utils';
-import { API_URL, getImageUrl } from '../../lib/config';
+import { cn, createSlug, getImageUrl } from '../../lib/utils';
+import { libraryAPI } from '../../lib/api';
 
 interface AudioLibrary {
   _id?: string;
@@ -31,20 +31,7 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
   useEffect(() => {
     const fetchAudioLibraries = async () => {
       try {
-        const response = await fetch(`${API_URL}/libraries/audio-books?limit=4`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        // Check if response is actually JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Response is not JSON - API server may not be running or endpoint not found');
-        }
-        
-        // API giờ trả về trực tiếp danh sách libraries, không cần group
-        const libraries = await response.json();
+        const libraries = await libraryAPI.getAudioBooks(4);
         
         // Chuyển đổi libraries sang format của AudioLibrary interface
         const audioLibrariesData = libraries.map((library: {

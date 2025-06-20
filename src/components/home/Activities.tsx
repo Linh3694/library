@@ -7,7 +7,10 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from '../../components/ui/carousel';
-import { API_URL, getImageUrl as getImageUrlFromConfig } from '../../lib/config';
+import { getImageUrl as getImageUrlFromConfig } from '../../lib/utils';
+
+// API Configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 interface ActivityDay {
   _id?: string;
@@ -68,7 +71,7 @@ const Activities: React.FC<ActivitiesProps> = ({ className }) => {
   const fetchActivities = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/library-activities?limit=10&includeHidden=false`);
+      const response = await fetch(`${API_BASE_URL}/library-activities?limit=10&includeHidden=false`);
       
       if (!response.ok) {
         throw new Error('Không thể tải danh sách hoạt động');

@@ -22,3 +22,22 @@ export function createSlug(title: string): string {
     .trim()
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 }
+
+// Helper function để xử lý đường dẫn ảnh
+export const getImageUrl = (imagePath: string | undefined | null): string | undefined => {
+  if (!imagePath) return undefined;
+  
+  // Nếu đã là URL đầy đủ (bắt đầu với http), trả về as-is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // Nếu bắt đầu với '/', đây là static asset từ public folder
+  if (imagePath.startsWith('/')) {
+    return imagePath;
+  }
+  
+  // Ngược lại, đây là file từ server uploads, thêm BASE_URL
+  const BASE_URL = 'https://api-dev.wellspring.edu.vn';
+  return `${BASE_URL}/${imagePath}`;
+};

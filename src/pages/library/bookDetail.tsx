@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '../../components/Header';
-import { API_URL, getImageUrl } from '../../lib/config';
+import { getImageUrl } from '../../lib/utils';
+import { libraryAPI } from '../../lib/api';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
 import {
@@ -116,27 +117,13 @@ const BookDetailPage = () => {
         setError(null);
         
         // Try to fetch book by slug first
-        const response = await fetch(`${API_URL}/libraries/books/detail/${slug}`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Response is not JSON');
-        }
-        
-        const book = await response.json();
+        const book = await libraryAPI.getBookDetailBySlug(slug);
         setBookDetail(book);
         
         // Fetch related books
         try {
-          const relatedResponse = await fetch(`${API_URL}/libraries/books/related?category=${encodeURIComponent(book.category || book.documentType || '')}&limit=10`);
-          if (relatedResponse.ok) {
-            const related = await relatedResponse.json();
-            setRelatedBooks(related);
-          }
+          const related = await libraryAPI.getRelatedBooks(book.category || book.documentType || '', 10);
+          setRelatedBooks(related);
         } catch (relatedError) {
           console.warn('Could not fetch related books:', relatedError);
           setRelatedBooks([]);

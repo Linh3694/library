@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { cn, createSlug } from '../../lib/utils';
-import { API_URL, getImageUrl } from '../../lib/config';
+import { cn, createSlug, getImageUrl } from '../../lib/utils';
+import { libraryAPI, type Library } from '../../lib/api';
 
 interface NewLibrary {
   _id?: string;
@@ -15,7 +15,6 @@ interface NewLibrary {
   isNewBook?: boolean;
   isFeaturedBook?: boolean;
   isAudioBook?: boolean;
-  // Thông tin bổ sung từ books trong library
   totalBooks?: number;
   averageRating?: number;
   totalBorrowCount?: number;
@@ -34,46 +33,18 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
   useEffect(() => {
     const fetchNewLibraries = async () => {
       try {
-        const response = await fetch(`${API_URL}/libraries/new-books?limit=4`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        // Check if response is actually JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Response is not JSON - API server may not be running or endpoint not found');
-        }
-        
-        // API trả về books với library info, cần group theo library
-        const books = await response.json();
+        const books = await libraryAPI.getNewBooks(4);
         
         // Group books theo libraryId để tạo unique libraries
         const libraryMap = new Map<string, NewLibrary>();
         
-        books.forEach((book: { 
-          libraryId: string; 
-          libraryCode?: string; 
-          libraryTitle?: string; 
-          bookTitle: string; 
-          authors?: string[]; 
-          category?: string; 
-          coverImage?: string; 
-          seriesName?: string;
-          documentType?: string;
-          isNewBook?: boolean; 
-          isFeaturedBook?: boolean; 
-          isAudioBook?: boolean;
-          rating?: number; 
-          borrowCount?: number;
-          publishYear?: number;
-        }) => {
-          const libraryId = book.libraryId;
+        books.forEach((book: Library) => {
+          const libraryId = book.libraryId || book._id;
           if (!libraryMap.has(libraryId)) {
             libraryMap.set(libraryId, {
               _id: libraryId,
               libraryCode: book.libraryCode,
-              title: book.libraryTitle || book.bookTitle, // Fallback to bookTitle if no libraryTitle
+              title: book.libraryTitle || book.bookTitle || book.title || 'Chưa có tên', // Fallback chain
               authors: book.authors,
               category: book.category,
               coverImage: book.coverImage,
