@@ -411,7 +411,7 @@ const BookDetailPage = () => {
                     <div className="relative">
                       <iframe
                         src={getEmbedUrl(bookDetail.introduction.linkEmbed)}
-                        className="w-[60%] h-[300px] border-0 rounded-lg mx-auto"
+                        className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
                         title={`Giới thiệu: ${bookDetail.title}`}
                         allow="autoplay; encrypted-media"
                         sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
