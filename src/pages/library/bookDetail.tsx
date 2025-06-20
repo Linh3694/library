@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
-import { getImageUrl } from '../../lib/utils';
+import { getImageUrl, createSlug } from '../../lib/utils';
 import { libraryAPI } from '../../lib/api';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
@@ -68,6 +68,7 @@ interface RelatedBook {
 
 const BookDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [bookDetail, setBookDetail] = useState<BookDetail | null>(null);
   const [relatedBooks, setRelatedBooks] = useState<RelatedBook[]>([]);
@@ -75,6 +76,12 @@ const BookDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'description' | 'introduction' | 'audiobook'>('description');
   const booksPerPage = 5;
+
+  // Handle click on related book
+  const handleRelatedBookClick = (book: RelatedBook) => {
+    const bookSlug = createSlug(book.title);
+    navigate(`/library/book/${bookSlug}`);
+  };
 
   // Helper function to convert URLs to embeddable format
   const getEmbedUrl = (url: string): string => {
@@ -500,7 +507,11 @@ const BookDetailPage = () => {
           
           <div className="grid grid-cols-5 gap-6 mb-8">
             {currentRelatedBooks.map((book) => (
-              <div key={book._id} className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm p-8">
+              <div 
+                key={book._id} 
+                className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm p-8 cursor-pointer hover:shadow-md transition-all duration-200 hover:bg-[#f0f0f0]"
+                onClick={() => handleRelatedBookClick(book)}
+              >
                 <div className="aspect-[4/5] flex justify-center items-center">
                   {book.coverImage ? (
                     <img
@@ -527,7 +538,15 @@ const BookDetailPage = () => {
                   
                  <div className="flex gap-1 pt-10 items-center justify-between">
                         <div>
-                        <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="font-bold text-[#757575] -ml-3 hover:text-[#002855]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRelatedBookClick(book);
+                          }}
+                        >
                           Mở rộng
                         </Button>
                        </div>

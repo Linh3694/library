@@ -8,42 +8,7 @@ import {
   CarouselNext,
 } from '../../components/ui/carousel';
 import { getImageUrl as getImageUrlFromConfig } from '../../lib/utils';
-
-// API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-
-interface ActivityDay {
-  _id?: string;
-  dayNumber: number;
-  date: string;
-  title: string;
-  description: string;
-  isPublished?: boolean;
-  images: Array<{
-    _id?: string;
-    url: string;
-    caption?: string;
-    uploadedAt?: string;
-  }>;
-}
-
-interface LibraryActivity {
-  _id: string;
-  title: string;
-  description?: string;
-  date: string;
-  days: ActivityDay[];
-  images: Array<{
-    _id: string;
-    url: string;
-    caption?: string;
-    uploadedAt: string;
-  }>;
-  isPublished: boolean;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { libraryAPI, type LibraryActivity } from '../../lib/api';
 
 interface Gallery {
   id: string;
@@ -71,14 +36,8 @@ const Activities: React.FC<ActivitiesProps> = ({ className }) => {
   const fetchActivities = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/library-activities?limit=10&includeHidden=false`);
-      
-      if (!response.ok) {
-        throw new Error('Không thể tải danh sách hoạt động');
-      }
-
-      const data = await response.json();
-      const activities: LibraryActivity[] = data.activities || [];
+      const response = await libraryAPI.getActivities(1, 10);
+      const activities: LibraryActivity[] = response.activities || [];
 
       // Chuyển đổi activities thành galleries format
       const convertedGalleries: Gallery[] = activities.map(activity => {
@@ -90,13 +49,11 @@ const Activities: React.FC<ActivitiesProps> = ({ className }) => {
           allImages.push(getImageUrl(img.url));
         });
         
-        // Thêm ảnh từ tất cả các days (chỉ những days đã published)
+        // Thêm ảnh từ tất cả các days
         activity.days.forEach(day => {
-          if (day.isPublished !== false) { // Default true nếu undefined
-            day.images.forEach(img => {
-              allImages.push(getImageUrl(img.url));
-            });
-          }
+          day.images.forEach(img => {
+            allImages.push(getImageUrl(img.url));
+          });
         });
 
         // Nếu không có ảnh nào, thêm ảnh mặc định
@@ -229,10 +186,10 @@ const Activities: React.FC<ActivitiesProps> = ({ className }) => {
 
         {/* Main Content - Oval Container */}
         <div className="flex justify-center pt-[3%]">
-          <div className="bg-[#f6f6f6] rounded-[60px] px-6 py-8 min-h-[550px] border-4 border-gray-100 w-fit">
+          <div className="bg-[#f6f6f6] rounded-[60px] min-h-[550px] border-4 border-gray-100 w-fit overflow-hidden">
             <div className="flex h-full items-center">
               {/* Left Side - Gallery List (1/4) */}
-              <div className="relative w-80 p-4 h-full">
+              <div className="relative w-80 px-6 py-8 h-full">
                 <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-[#F05023] scrollbar-track-gray-100">
                   {galleries.map((gallery) => (
                     <button
@@ -265,7 +222,7 @@ const Activities: React.FC<ActivitiesProps> = ({ className }) => {
               </div>
 
               {/* Right Side - Image Carousel */}
-              <div className="w-full h-full">
+              <div className="flex-1 h-full py-8 pr-6">
                 <div className="h-full flex flex-col">               
                   {/* Carousel Container */}
                   <div className="flex-1 flex items-center justify-center">
@@ -274,18 +231,17 @@ const Activities: React.FC<ActivitiesProps> = ({ className }) => {
                         <CarouselContent className="h-full">
                           {selectedGallery.images.map((image, index) => (
                             <CarouselItem key={index} className="h-full">
-                              <div className="relative w-full h-[450px] rounded-4xl overflow-hidden shadow-lg">
+                              <div className="relative max-w-[1150px] h-[450px] rounded-4xl overflow-hidden shadow-lg">
                                 <img
                                   src={image}
                                   alt={`${selectedGallery.name} - Ảnh ${index + 1}`}
-                                  className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                   onError={(e) => {
                                     // Fallback nếu ảnh không load được
                                     const target = e.target as HTMLImageElement;
                                     target.src = '/hero-01.jpg';
                                   }}
                                 />
-                                
                                 {/* Navigation buttons inside image */}
                                 <div className="absolute inset-0 flex items-center justify-between p-4 opacity-0 hover:opacity-100 transition-opacity duration-300">
                                   <button

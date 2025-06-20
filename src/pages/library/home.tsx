@@ -78,7 +78,7 @@ const BookImage = ({
     if (currentSrc !== fallback) {
       setCurrentSrc(fallback);
     }
-  };
+  };  
 
   return (
     <div className="relative w-full h-full">
