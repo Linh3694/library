@@ -42,54 +42,40 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
           throw new Error('Response is not JSON - API server may not be running or endpoint not found');
         }
         
-        // API trả về books với library info, cần group theo library
-        const books = await response.json();
+        // API giờ trả về trực tiếp danh sách libraries, không cần group
+        const libraries = await response.json();
         
-        // Group books theo libraryId để tạo unique libraries
-        const libraryMap = new Map<string, AudioLibrary>();
+        // Chuyển đổi libraries sang format của AudioLibrary interface
+        const audioLibrariesData = libraries.map((library: {
+          _id?: string;
+          libraryId: string;
+          libraryCode?: string;
+          title: string;
+          authors?: string[];
+          category?: string;
+          coverImage?: string;
+          isAudioBook: boolean;
+          isNewBook?: boolean;
+          isFeaturedBook?: boolean;
+          totalBooks?: number;
+          rating?: number;
+          borrowCount?: number;
+        }) => ({
+          _id: library._id || library.libraryId,
+          libraryCode: library.libraryCode,
+          title: library.title,
+          authors: library.authors,
+          category: library.category,
+          coverImage: library.coverImage,
+          isAudioBook: library.isAudioBook,
+          isNewBook: library.isNewBook,
+          isFeaturedBook: library.isFeaturedBook,
+          totalBooks: library.totalBooks || 0,
+          averageRating: library.rating || 0,
+          totalBorrowCount: library.borrowCount || 0
+        }));
         
-        books.forEach((book: { 
-          libraryId: string; 
-          libraryCode?: string; 
-          libraryTitle?: string; 
-          bookTitle: string; 
-          authors?: string[]; 
-          category?: string; 
-          coverImage?: string; 
-          isAudioBook?: boolean; 
-          isNewBook?: boolean; 
-          isFeaturedBook?: boolean; 
-          rating?: number; 
-          borrowCount?: number; 
-        }) => {
-          const libraryId = book.libraryId;
-          if (!libraryMap.has(libraryId)) {
-            libraryMap.set(libraryId, {
-              _id: libraryId,
-              libraryCode: book.libraryCode,
-              title: book.libraryTitle || book.bookTitle, // Fallback to bookTitle if no libraryTitle
-              authors: book.authors,
-              category: book.category,
-              coverImage: book.coverImage,
-                             isAudioBook: book.isAudioBook || false,
-              isNewBook: book.isNewBook,
-              isFeaturedBook: book.isFeaturedBook,
-              totalBooks: 1,
-              averageRating: book.rating || 0,
-              totalBorrowCount: book.borrowCount || 0
-            });
-          } else {
-            // Update existing library with more book data
-            const existingLibrary = libraryMap.get(libraryId)!;
-            existingLibrary.totalBooks = (existingLibrary.totalBooks || 0) + 1;
-            existingLibrary.averageRating = ((existingLibrary.averageRating || 0) + (book.rating || 0)) / 2;
-            existingLibrary.totalBorrowCount = (existingLibrary.totalBorrowCount || 0) + (book.borrowCount || 0);
-          }
-        });
-        
-        // Convert map to array và chỉ lấy 4 libraries đầu tiên
-        const uniqueLibraries = Array.from(libraryMap.values()).slice(0, 4);
-        setAudioLibraries(uniqueLibraries);
+        setAudioLibraries(audioLibrariesData);
         
       } catch (error) {
         console.error('Error fetching audio libraries:', error);
