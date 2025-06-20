@@ -380,9 +380,21 @@ const BookDetailPage = () => {
                   </div>
                 )}
                 {/* Hiển thị nội dung mô tả */}
-                <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 ">
-                  <p>{bookDetail?.description?.content || "Chưa có mô tả cho cuốn sách này."}</p>
-                </div>
+                {bookDetail?.description?.content ? (
+                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2">
+                    <p>{bookDetail.description.content}</p>
+                  </div>
+                ) : (
+                  <div className="w-full p-12 text-center">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-700 mb-2">Chưa có mô tả</h4>
+                  
+                  </div>
+                )}
               </div>
             ) : activeTab === 'introduction' ? (
               <div className="items-center justify-center text-center">
@@ -416,9 +428,21 @@ const BookDetailPage = () => {
                   </div>
                 )}
                 {/* Hiển thị nội dung giới thiệu */}
-                <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 ">
-                  <p>{bookDetail?.introduction?.content || "Chưa có giới thiệu cho cuốn sách này."}</p>
-                </div>
+                {bookDetail?.introduction?.content ? (
+                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2">
+                    <p>{bookDetail.introduction.content}</p>
+                  </div>
+                ) : (
+                  <div className="w-full  p-12 text-center">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-700 mb-2">Chưa có giới thiệu</h4>
+                    
+                  </div>
+                )}
               </div>
             ) : (
               <div className="items-center justify-center text-center">
@@ -453,19 +477,14 @@ const BookDetailPage = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="w-full bg-gray-50 rounded-2xl p-8 text-center border-2 border-dashed border-gray-300">
+                  <div className="w-full p-12 text-center ">
                     <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                       </svg>
                     </div>
                     <h4 className="text-lg font-medium text-gray-700 mb-2">Chưa có link sách nói</h4>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Link sách nói sẽ được cập nhật từ trang quản trị để bạn có thể nghe trực tiếp tại đây.
-                    </p>
-                    <div className="text-xs text-gray-400">
-                      Hỗ trợ các nền tảng: Voiz FM, Spotify, SoundCloud, YouTube, và các player khác
-                    </div>
+                  
                   </div>
                 )}
               </div>
