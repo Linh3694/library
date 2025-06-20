@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { cn } from '../../lib/utils';
+import { Link } from 'react-router-dom';
+import { cn, createSlug } from '../../lib/utils';
 import { API_URL, getImageUrl } from '../../lib/config';
 
 interface NewLibrary {
@@ -162,7 +163,9 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
               )}
             >
               {/* Library Cover Container */}
-              <div className="relative w-[200px] h-[266px] min-h-[266px] flex items-center justify-center">
+              <Link 
+                to={`/library/book/${createSlug(library.title)}`}
+                className="relative w-[200px] h-[266px] min-h-[266px] flex items-center justify-center hover:scale-105 transition-transform duration-300">
                 {/* Library Cover */}
                 {library.coverImage ? (
                   <img 
@@ -196,7 +199,7 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
                 )}
     
             
-              </div>
+              </Link>
 
               {/* Library Info */}
               <div className="w-full text-center pt-5">

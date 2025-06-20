@@ -45,7 +45,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
 
                 <p className="text-xs leading-relaxed">
                   www.wellspring.edu.vn<br />
-                  Số 4 Ngõ 16, Tố Hữu, Đống Đa, Hà Nội
+                  95 Ai Mo St., Bo De Ward, Long Bien Dist., Hanoi
                 </p>
               </div>
 

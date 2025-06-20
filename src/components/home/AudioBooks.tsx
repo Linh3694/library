@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { cn } from '../../lib/utils';
+import { Link } from 'react-router-dom';
+import { cn, createSlug } from '../../lib/utils';
 import { API_URL, getImageUrl } from '../../lib/config';
 
 interface AudioLibrary {
@@ -127,19 +128,21 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
             audioLibraries.slice(0, 4).map((library, index) => (
               <div key={library._id || index} className="flex flex-col items-center group">
                 {/* Oval Container with Cover and Title */}
-                <div className="relative w-full aspect-[4/5] mb-4 cursor-pointer">
+                <Link 
+                  to={`/library/book/${createSlug(library.title)}`}
+                  className="relative w-full aspect-[4/5] mb-4 cursor-pointer hover:scale-105 transition-transform duration-300">
                   {/* Oval Background */}
                   <div className="absolute inset-0 bg-[#f6f6f6] rounded-4xl"></div>
                   {/* Positions 1 and 3 (index 0,2): Title at bottom + Headphone icon */}
                   {(index === 0 || index === 2) && (
                     <>
                       {/* Library Cover - Large with border */}
-                      <div className="absolute top-[8%] left-1/2 transform -translate-x-1/2 w-[70%] h-[70%]">
+                      <div className="absolute top-[8%] left-1/2 transform -translate-x-1/2 w-[70%] h-[73%]">
                         {library.coverImage ? (
                           <img 
                             src={getImageUrl(library.coverImage)} 
                             alt={library.title}
-                            className="w-full h-full object-cover rounded-2xl shadow-lg border-2 border-white"
+                            className="w-full h-full object-cover rounded-4xl shadow-lg border-4 border-white/20"
                           />
                         ) : (
                           <div className="w-full h-full rounded-4xl shadow-lg border-2 border-white flex flex-col items-center justify-center text-white font-bold text-center p-4 relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600">
@@ -163,9 +166,9 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                           <img 
                             src="/micro.svg" 
                             alt="Micro" 
-                            className="w-10 h-10 mr-2"
+                            className="w-8 h-8 mr-2"
                           />
-                          <span className="font-bold uppercase text-xl">{library.title}</span>
+                          <span className="font-bold uppercase text-lg">{library.title}</span>
                         </div>
                       </div>
                     </>
@@ -180,19 +183,19 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                           <img 
                             src="/micro.svg" 
                             alt="Micro" 
-                            className="w-10 h-10 mr-2"
+                            className="w-8 h-8 mr-2"
                           />
-                          <span className="font-bold uppercase text-xl">{library.title}</span>
+                          <span className="font-bold uppercase text-lg">{library.title}</span>
                         </div>
                       </div>
 
                       {/* Library Cover - Lower center of oval */}
-                      <div className="absolute top-[22%] left-1/2 transform -translate-x-1/2 w-[70%] h-[70%]">
+                      <div className="absolute top-[15%] left-1/2 transform -translate-x-1/2 w-[70%] h-[75%]">
                         {library.coverImage ? (
                           <img 
                             src={getImageUrl(library.coverImage)} 
                             alt={library.title}
-                            className="w-full h-full object-cover rounded-4xl shadow-lg border-2 border-white"
+                            className="w-full h-full object-cover rounded-4xl shadow-lg border-4 border-white/20"
                           />
                         ) : (
                           <div className="w-full h-full rounded-4xl shadow-md flex flex-col items-center justify-center text-white font-bold text-center p-3 relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600">
@@ -200,11 +203,6 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                               <div className="text-xs font-bold uppercase leading-tight">
                                 {library.title}
                               </div>
-                              {library.totalBooks && (
-                                <div className="text-xs mt-1 opacity-90">
-                                  {library.totalBooks} quyển
-                                </div>
-                              )}
                             </div>
                           </div>
                         )}
@@ -213,10 +211,8 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                   )}
                   
                   {/* Library Stats Overlay */}
-                  <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
-                    {library.totalBooks || 1} quyển
-                  </div>
-                </div>
+                 
+                </Link>
               </div>
             ))
           ) : (

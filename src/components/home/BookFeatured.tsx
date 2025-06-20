@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { cn } from '../../lib/utils';
+import { Link } from 'react-router-dom';
+import { cn, createSlug } from '../../lib/utils';
 import { API_URL, getImageUrl } from '../../lib/config';
 
 interface FeaturedLibrary {
@@ -127,11 +128,13 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
             </div>
           ) : featuredLibraries.length > 0 ? (
             // First library with special layout
-            <div className="flex flex-col items-start mt-[80%] ml-[10%]">
+            <div className="flex flex-col items-start mt-[80%] ml-[10%] group hover:scale-105 transition-transform duration-300">
               {/* Circle Container */}
-              <div className="relative w-96 h-64 rounded-full bg-gray-100 flex items-center justify-center mb-8 group">
+              <Link 
+                to={`/library/book/${createSlug(featuredLibraries[0].title)}`}
+                className="relative w-96 h-64 rounded-full bg-gray-100 flex items-center justify-center mb-8">
                 {/* Library Cover */}
-                <div className="relative w-[150px] h-[200px] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                <div className="relative w-[150px] h-[200px] flex items-center justify-center">
                   {featuredLibraries[0].coverImage ? (
                     <img 
                       src={getImageUrl(featuredLibraries[0].coverImage)} 
@@ -154,7 +157,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                     </div>
                   )}
                 </div>
-              </div>
+              </Link>
 
               {/* Library Information */}
               <div className="text-left ml-[10%] max-w-md">
@@ -255,7 +258,9 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                 {featuredLibraries.length > 1 && (
                   <div className="flex flex-col mr-10 items-center text-center group hover:scale-105 transition-transform duration-300">
                     {/* Library Cover Container with Gray Oval Background */}
-                    <div className="relative mb-4 flex items-center justify-center">
+                    <Link
+                      to={`/library/book/${createSlug(featuredLibraries[1].title)}`}
+                      className="relative mb-4 flex items-center justify-center">
                       {/* Gray Oval Background - Horizontal for short library */}
                       <div className="absolute bg-gray-200 w-[400px] h-[250px] rounded-full"></div>
                       {/* Library Cover */}
@@ -282,7 +287,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                           </div>
                         )}
                       </div>                           
-                    </div>
+                    </Link>
 
                     {/* Library Info */}
                     <div className="w-[350px] text-start mt-12 -ml-10">
@@ -306,7 +311,9 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                 {featuredLibraries.length > 2 && (
                   <div className="flex flex-col items-center text-center group hover:scale-105 transition-transform duration-300">
                     {/* Library Cover Container with Gray Oval Background */}
-                    <div className="relative mb-4 flex items-center justify-center">
+                    <Link 
+                      to={`/library/book/${createSlug(featuredLibraries[2].title)}`}
+                      className="relative mb-4 flex items-center justify-center">
                       {/* Gray Oval Background - Vertical for tall library */}
                       <div className="absolute bg-gray-200 w-[350px] h-[500px] rounded-[100px] -top-10"></div>
                       {/* Library Cover */}
@@ -333,7 +340,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                           </div>
                         )}
                       </div>                           
-                    </div>
+                    </Link>
 
                     {/* Library Info */}
                     <div className="w-[350px] text-start mt-32">

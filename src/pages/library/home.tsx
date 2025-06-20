@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { createSlug } from '../../lib/utils';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import {
@@ -244,7 +246,9 @@ const LibraryHomePage = () => {
               <div className="grid grid-cols-4 gap-8">
                 {/* Featured Book - Chiếm 2 hàng */}
                 {featuredBook && (
-                    <div className="col-span-2 row-span-2 bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[15%] py-[5%]">
+                    <Link 
+                      to={`/library/book/${createSlug(featuredBook.title)}`}
+                      className="col-span-2 row-span-2 bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[15%] py-[5%]">
                      <div className="aspect-[5/6] pt-[5%] pb-[3%] relative flex justify-center items-center">
                       <img
                         src={featuredBook.image}
@@ -265,12 +269,15 @@ const LibraryHomePage = () => {
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 )}
 
                 {/* Regular Books - Grid 4 cột */}
                 {regularBooks.map((book) => (
-                <div key={book.id} className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[20%] py-[5%]">
+                <Link 
+                  key={book.id} 
+                  to={`/library/book/${createSlug(book.title)}`}
+                  className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[20%] py-[5%]">
                      <div className="aspect-[5/6] pt-[8%] pb-[4%] relative flex justify-center items-center">
                       <img
                         src={book.image}
@@ -289,7 +296,7 @@ const LibraryHomePage = () => {
                        
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
