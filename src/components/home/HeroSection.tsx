@@ -20,7 +20,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
             <div className="relative mt-[15%]">
               <div className="w-96 h-96 rounded-full overflow-hidden border-4 border-white shadow-lg">
                 <img 
-                  src="/hero-01.jpg" 
+                  src="/hero-01.png" 
                   alt="Library Scene 1" 
                   className="w-full h-full object-cover"
                 />
