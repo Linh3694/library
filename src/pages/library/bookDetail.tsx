@@ -108,6 +108,11 @@ const BookDetailPage = () => {
     return url;
   };
 
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [slug]);
+
   // Fetch book detail by slug
   useEffect(() => {
     const fetchBookDetail = async () => {
