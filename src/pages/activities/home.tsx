@@ -121,52 +121,35 @@ const ImageModal = ({ modalState, setModalState }: {
                 e.stopPropagation();
                 handlePrevious();
               }}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+              className="absolute left-8 top-1/2 transform -translate-y-1/2 bg-white/90 text-gray-800 w-10 h-10 rounded-full hover:bg-white hover:scale-105 transition-all duration-200 z-20 flex items-center justify-center shadow-xl border-2 border-gray-200"
             >
-              ←
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleNext();
               }}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+              className="absolute right-8 top-1/2 transform -translate-y-1/2 bg-white/90 text-gray-800 w-10 h-10 rounded-full hover:bg-white hover:scale-105 transition-all duration-200 z-20 flex items-center justify-center shadow-xl border-2 border-gray-200"
             >
-              →
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           </>
         )}
 
-        {/* Image */}
-        <div className="flex flex-col items-center justify-center max-w-full max-h-full">
+        {/* Image Container */}
+        <div className="flex items-center justify-center max-w-full max-h-full mx-20">
           <img
             src={currentImage.url}
             alt={currentImage.caption || modalState.currentActivity.title}
-            className="max-w-full max-h-[80vh] object-contain rounded-lg"
+            className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
-          
-          {/* Image info */}
-          <div className="mt-4 text-center text-white">
-            <p className="text-sm opacity-75">
-              {modalState.currentImageIndex + 1} / {images.length}
-            </p>
-            {currentImage.caption && (
-              <p className="text-sm mt-1">{currentImage.caption}</p>
-            )}
-            <p className="text-xs opacity-60 mt-1">
-              Từ: {currentImage.source}
-            </p>
-          </div>
         </div>
-
-        {/* Close button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-        >
-          ×
-        </button>
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ import {
 } from '../../components/ui/breadcrumb';
 import { Input } from '../../components/ui/input';
 import { Checkbox } from '../../components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
+
 import { Search, ChevronDown, Loader2 } from 'lucide-react';
 import { Pagination } from '../../components/ui/pagination';
 import { libraryAPI, type Library } from '../../lib/api';
@@ -37,15 +37,7 @@ const getUniqueCategories = (books: Library[]) => {
   return ['Tất cả', ...Array.from(categories)];
 };
 
-const getUniqueGenres = (books: Library[]) => {
-  const genres = new Set<string>();
-  books.forEach(book => {
-    if (book.category) genres.add(book.category);
-    if (book.documentType) genres.add(book.documentType);
-    if (book.seriesName) genres.add(book.seriesName);
-  });
-  return ['Tất cả', ...Array.from(genres)];
-};
+
 
 // Component Image wrapper để handle loading state
 const BookImage = ({ 
@@ -100,8 +92,10 @@ const BookImage = ({
 
 const LibraryHomePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Tất cả');
-  const [selectedGenre, setSelectedGenre] = useState('Tất cả');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [isBookNew, setIsBookNew] = useState(false);
+  const [isFeaturedBook, setIsFeaturedBook] = useState(false);
+  const [isAudioBook, setIsAudioBook] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('Mới nhất');
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
@@ -143,15 +137,17 @@ const LibraryHomePage = () => {
   const filteredBooks = books.filter((library: Library) => {
     const matchesSearch = library.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          library.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategory === 'Tất cả' || 
-                           library.category?.includes(selectedCategory) || 
-                           library.documentType?.includes(selectedCategory);
-    const matchesGenre = selectedGenre === 'Tất cả' || 
-                        library.category?.includes(selectedGenre) || 
-                        library.documentType?.includes(selectedGenre) ||
-                        library.seriesName?.includes(selectedGenre);
     
-    return matchesSearch && matchesCategory && matchesGenre;
+    const matchesCategory = selectedCategories.length === 0 || 
+                           selectedCategories.some(cat => 
+                             library.category?.includes(cat) || 
+                             library.documentType?.includes(cat)
+                           );
+    
+    const matchesBookType = (!isFeaturedBook || library.isFeaturedBook) &&
+                           (!isAudioBook || library.isAudioBook);
+    
+    return matchesSearch && matchesCategory && matchesBookType;
   });
 
   // Sắp xếp thư viện
@@ -180,9 +176,8 @@ const LibraryHomePage = () => {
   const featuredBook = currentBooks.find((library: Library) => library.isFeaturedBook) || currentBooks[0];
   const regularBooks = currentBooks.filter((library: Library) => library._id !== featuredBook?._id);
 
-  // Tạo danh sách categories và genres từ dữ liệu
+  // Tạo danh sách categories từ dữ liệu
   const categories = getUniqueCategories(books);
-  const genres = getUniqueGenres(books);
 
   return (
     <div className="min-h-screen bg-white">
@@ -220,24 +215,31 @@ const LibraryHomePage = () => {
                   <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isCategoryOpen ? 'rotate-0' : '-rotate-90'}`} />
                 </h3>
                 {isCategoryOpen && (
-                  <RadioGroup
-                    value={selectedCategory}
-                    onValueChange={setSelectedCategory}
-                  >
-                    {categories.map((category: string) => (
-                      <div key={category} className="flex items-center space-x-2">
-                        <RadioGroupItem value={category} id={`category-${category}`} />
+                  <div className="space-y-3">
+                    {categories.filter(cat => cat !== 'Tất cả').map((category: string) => (
+                      <div key={category} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={`category-${category}`}
+                          checked={selectedCategories.includes(category)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedCategories([...selectedCategories, category]);
+                            } else {
+                              setSelectedCategories(selectedCategories.filter(cat => cat !== category));
+                            }
+                          }}
+                        />
                         <label
                           htmlFor={`category-${category}`}
                           className={`text-sm cursor-pointer ${
-                            selectedCategory === category ? 'font-medium text-[#002855]' : 'text-gray-700'
+                            selectedCategories.includes(category) ? 'font-medium text-[#002855]' : 'text-gray-700'
                           }`}
                         >
                           {category}
                         </label>
                       </div>
                     ))}
-                  </RadioGroup>
+                  </div>
                 )}
               </div>
 
@@ -252,23 +254,51 @@ const LibraryHomePage = () => {
                 </h3>
                 {isGenreOpen && (
                   <div className="space-y-3">
-                    {genres.map((genre: string) => (
-                      <div key={genre} className="flex items-center space-x-3">
-                        <Checkbox
-                          id={`genre-${genre}`}
-                          checked={selectedGenre === genre}
-                          onCheckedChange={(checked) => setSelectedGenre(checked ? genre : 'Tất cả')}
-                        />
-                        <label
-                          htmlFor={`genre-${genre}`}
-                          className={`text-sm cursor-pointer ${
-                            selectedGenre === genre ? 'font-medium text-[#002855]' : 'text-gray-700'
-                          }`}
-                        >
-                          {genre}
-                        </label>
-                      </div>
-                    ))}
+                    <div className="flex items-center space-x-3">
+                      <Checkbox
+                        id="book-new"
+                        checked={isBookNew}
+                        onCheckedChange={(checked) => setIsBookNew(checked === true)}
+                      />
+                      <label
+                        htmlFor="book-new"
+                        className={`text-sm cursor-pointer ${
+                          isBookNew ? 'font-medium text-[#002855]' : 'text-gray-700'
+                        }`}
+                      >
+                        Sách Mới
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Checkbox
+                        id="featured-book"
+                        checked={isFeaturedBook}
+                        onCheckedChange={(checked) => setIsFeaturedBook(checked === true)}
+                      />
+                      <label
+                        htmlFor="featured-book"
+                        className={`text-sm cursor-pointer ${
+                          isFeaturedBook ? 'font-medium text-[#002855]' : 'text-gray-700'
+                        }`}
+                      >
+                        Nổi bật
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Checkbox
+                        id="audio-book"
+                        checked={isAudioBook}
+                        onCheckedChange={(checked) => setIsAudioBook(checked === true)}
+                      />
+                      <label
+                        htmlFor="audio-book"
+                        className={`text-sm cursor-pointer ${
+                          isAudioBook ? 'font-medium text-[#002855]' : 'text-gray-700'
+                        }`}
+                      >
+                        Sách Nói
+                      </label>
+                    </div>
                   </div>
                 )}
               </div>

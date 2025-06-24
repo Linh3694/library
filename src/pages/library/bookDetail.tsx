@@ -442,45 +442,37 @@ const BookDetailPage = () => {
               </div>
             ) : (
               <div className="items-center justify-center text-center">
-                {/* Audio Player Frame */}
-                {bookDetail?.audioBook?.linkEmbed ? (
-                  <div className="w-[60%] mx-auto">
-                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 mb-6">
-                      <div className="relative">
-                        <iframe
-                          src={getEmbedUrl(bookDetail.audioBook.linkEmbed)}
-                          className="w-full h-[480px] border-0"
-                          title={`Audiobook: ${bookDetail.title}`}
-                          allow="autoplay; encrypted-media"
-                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                          loading="lazy"
-                        />
-                        {/* Loading overlay */}
-                        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300" id="iframe-loading">
-                          <div className="text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                            <div className="text-sm text-gray-600">Đang tải player...</div>
-                          </div>
-                        </div>
-                      </div>
+                {/* Hiển thị link embed nếu có */}
+                {bookDetail?.audioBook?.linkEmbed && (
+                  <div className="mb-10">
+                    <div className="relative">
+                      <iframe
+                        src={getEmbedUrl(bookDetail.audioBook.linkEmbed)}
+                        className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
+                        title={`Audiobook: ${bookDetail.title}`}
+                        allow="autoplay; encrypted-media"
+                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                        loading="lazy"
+                        onError={() => {
+                          console.warn('Failed to load embed content');
+                        }}
+                      />
                     </div>
-                    
-                    {/* Hiển thị nội dung mô tả sách nói */}
-                    {bookDetail?.audioBook?.content && (
-                      <div className="w-[80%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 mt-10 border-b border-[#DDDDDD] pb-10">
-                        <p>{bookDetail.audioBook.content}</p>
-                      </div>
-                    )}
+                  </div>
+                )}
+                {/* Hiển thị nội dung mô tả sách nói */}
+                {bookDetail?.audioBook?.content ? (
+                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
+                    <p>{bookDetail.audioBook.content}</p>
                   </div>
                 ) : (
-                  <div className="w-full p-12 text-center ">
+                  <div className="w-full p-12 text-center">
                     <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                       </svg>
                     </div>
                     <h4 className="text-lg font-medium text-gray-700 mb-2">Chưa có link sách nói</h4>
-                  
                   </div>
                 )}
               </div>
