@@ -135,14 +135,14 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                       </div>
 
                       {/* Title and Micro Icon - Bottom */}
-                      <div className="absolute bottom-[5%] left-[10%] w-full text-start">
-                        <div className="inline-flex items-center justify-center text-[#002855] font-medium px-3 py-1 rounded-full">
+                      <div className="absolute bottom-[5%] left-[10%] w-[80%] text-start">
+                        <div className="inline-flex items-start justify-start text-[#002855] font-medium px-3 py-1 rounded-full">
                           <img 
                             src="/micro.svg" 
                             alt="Micro" 
-                            className="w-8 h-8 mr-2"
+                            className="w-8 h-8 mr-2 flex-shrink-0"
                           />
-                          <span className="font-bold uppercase text-lg">{library.title}</span>
+                          <span className="font-bold uppercase text-lg break-words whitespace-normal leading-tight">{library.title}</span>
                         </div>
                       </div>
                     </>
@@ -152,14 +152,14 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                   {(index === 1 || index === 3) && (
                     <>
                       {/* Library Title - Top of oval */}
-                      <div className="absolute top-[5%] left-[10%] w-full text-start">
-                        <div className="inline-flex items-center justify-start text-[#002855] font-medium px-3 py-1 rounded-full">
+                      <div className="absolute top-[5%] left-[10%] w-[80%] text-start">
+                        <div className="inline-flex items-start justify-start text-[#002855] font-medium px-3 py-1 rounded-full">
                           <img 
                             src="/micro.svg" 
                             alt="Micro" 
-                            className="w-8 h-8 mr-2"
+                            className="w-8 h-8 mr-2 flex-shrink-0"
                           />
-                          <span className="font-bold uppercase text-lg">{library.title}</span>
+                          <span className="font-bold uppercase text-lg break-words whitespace-normal leading-tight">{library.title}</span>
                         </div>
                       </div>
 
