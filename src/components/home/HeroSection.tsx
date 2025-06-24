@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
 interface HeroSectionProps {
@@ -6,6 +7,12 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
+  const navigate = useNavigate();
+
+  const handleOpenLibrary = () => {
+    navigate('/library');
+  };
+
   return (
     <section className={cn(
       "relative py-8 px-4 bg-gray-50 overflow-hidden",
@@ -50,8 +57,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
           </div>
 
           {/* CTA Button */}
-          <button className="inline-flex items-center px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full transition-colors duration-200 shadow-lg hover:shadow-xl">
-            Mở tư sách
+          <button 
+            onClick={handleOpenLibrary}
+            className="inline-flex items-center px-8 py-3 bg-[#F05023] hover:bg-orange-600 text-white font-bold rounded-full transition-colors duration-200 shadow-lg hover:shadow-xl"
+          >
+            Mở tủ sách
             <svg 
               className="ml-2 w-5 h-5" 
               fill="none" 
@@ -62,7 +72,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
                 strokeWidth={2} 
-                d="M9 5l7 7-7 7" 
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" 
               />
             </svg>
           </button>
@@ -82,41 +92,41 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
             <div className="w-6"></div> */}
             
             {/* L = .-.. */}
-            <div className="w-10 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-green-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-10 h-10 bg-green-400 rounded-full"></div>
+            <div className="w-10 h-10 bg-[#FFCE02] rounded-full"></div>
+            <div className="w-20 h-10 bg-[#BED232] rounded-full"></div>
+            <div className="w-20 h-10 bg-[#FFCE02] rounded-full"></div>
+            <div className="w-10 h-10 bg-[#BED232] rounded-full"></div>
             <div className="w-6"></div>
             
             {/* L = .-.. */}
-            <div className="w-10 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-green-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-10 h-10 bg-green-400 rounded-full"></div>
+            <div className="w-10 h-10 bg-[#FFCE02] rounded-fu  ll"></div>
+            <div className="w-20 h-10 bg-[#BED232] rounded-full"></div>
+            <div className="w-20 h-10 bg-[#FFCE02] rounded-full"></div>
+            <div className="w-10 h-10 bg-[#BED232] rounded-full"></div>
             <div className="w-6"></div>
             
             {/* S = ... */}
-            <div className="w-10 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-green-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-10 h-10 bg-green-400 rounded-full"></div>
+            <div className="w-10 h-10 bg-[#FFCE02] rounded-full"></div>
+            <div className="w-20 h-10 bg-[#BED232] rounded-full"></div>
+            <div className="w-20 h-10 bg-[#FFCE02] rounded-full"></div>
+            <div className="w-10 h-10 bg-[#BED232] rounded-full"></div>
             
             {/* P = .--. */}
-            <div className="w-10 h-10 bg-green-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-green-400 rounded-full"></div>
-            <div className="w-10 h-10 bg-yellow-400 rounded-full"></div>
+            <div className="w-10 h-10 bg-[#BED232] rounded-full"></div>
+            <div className="w-20 h-10 bg-[#FFCE02] rounded-full"></div>
+            <div className="w-20 h-10 bg-[#BED232] rounded-full"></div>
+            <div className="w-10 h-10 bg-[#FFCE02] rounded-full"></div>
             <div className="w-6"></div>
             
             {/* R = .-. */}
-            <div className="w-10 h-10 bg-green-400 rounded-full"></div>
-            <div className="w-20 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-10 h-10 bg-green-400 rounded-full"></div>
+            <div className="w-10 h-10 bg-[#BED232] rounded-full"></div>
+            <div className="w-20 h-10 bg-[#FFCE02] rounded-full"></div>
+            <div className="w-10 h-10 bg-[#BED232] rounded-full"></div>
             <div className="w-6"></div>
             
             {/* I = .. */}
-            <div className="w-10 h-10 bg-yellow-400 rounded-full"></div>
-            <div className="w-10 h-10 bg-green-400 rounded-full"></div>
+            <div className="w-10 h-10 bg-[#FFCE02] rounded-full"></div>
+            <div className="w-10 h-10 bg-[#BED232] rounded-full"></div>
             <div className="w-6"></div>
             
             {/* N = -. */}
