@@ -33,7 +33,7 @@ jobs:
 
       - name: Build application
         run: |
-          VITE_API_BASE_URL=https://api.wellspring.edu.vn/api npm run build
+          VITE_API_BASE_URL=https://api-dev.wellspring.edu.vn/api npm run build
 
       - name: Add production server to known_hosts
         run: |
@@ -61,7 +61,7 @@ jobs:
 
             # Install and build
             npm ci
-            VITE_API_BASE_URL=https://api.wellspring.edu.vn/api npm run build
+            VITE_API_BASE_URL=https://api-dev.wellspring.edu.vn/api npm run build
 
             # Restart app
             if command -v pm2 &> /dev/null; then
