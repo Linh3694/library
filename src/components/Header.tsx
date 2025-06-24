@@ -17,8 +17,8 @@ const Header: React.FC<HeaderProps> = ({
     { label: 'Trang chủ', href: '/' },
     { label: 'Thư viện sách', href: '/library' },
     { label: 'Hoạt động', href: '/activities' },
-    { label: 'Mượn - Trả sách', href: '/borrow' },
-    { label: 'Tìm kiếm sách', href: '/search' },
+    // { label: 'Mượn - Trả sách', href: '/borrow' },
+    // { label: 'Tìm kiếm sách', href: '/search' },
   ];
 
   return (
