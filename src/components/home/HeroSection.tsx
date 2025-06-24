@@ -59,7 +59,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
           {/* CTA Button */}
           <button 
             onClick={handleOpenLibrary}
-            className="inline-flex items-center px-8 py-3 bg-[#F05023] hover:bg-orange-600 text-white font-bold rounded-full transition-colors duration-200 shadow-lg hover:shadow-xl"
+            className="inline-flex items-center px-8 py-3 bg-[#F05023] hover:bg-orange-600 hover:scale-105 text-white font-bold rounded-full transition-colors duration-200 shadow-lg hover:shadow-xl"
           >
             Mở tủ sách
             <svg 
