@@ -79,7 +79,7 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
               <div className="w-6 h-6 bg-[#FFCE02] rounded-full"></div>
             </div>
             <div className="w-full mx-auto flex items-center justify-between gap-4">
-              <h2 className="text-5xl font-extrabold text-[#002855]">SÁCH SÁCH NÓI</h2>
+              <h2 className="text-5xl font-extrabold text-[#002855]">SÁCH NÓI</h2>
               <div className="ml-auto mr-20">
                 <button className="text-[#F05023] font-extrabold hover:text-orange-600 transition-colors">
                   XEM THÊM

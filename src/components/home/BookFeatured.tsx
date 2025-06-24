@@ -363,7 +363,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
           <div className="w-6 h-6 bg-[#FFCE02] rounded-full"></div>
           <div className="w-6 h-6 bg-[#BED232] rounded-full"></div>
             </div>
-          <h2 className="text-5xl font-extrabold text-[#002855]">THƯ VIỆN NỔI BẬT</h2>
+          <h2 className="text-5xl font-extrabold text-[#002855]">SÁCH NỔI BẬT</h2>
         </div>
       </div>
     </section>
