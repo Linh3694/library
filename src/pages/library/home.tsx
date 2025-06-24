@@ -346,7 +346,7 @@ const LibraryHomePage = () => {
                 {featuredBook && (
                     <Link 
                       to={`/library/book/${createSlug(featuredBook.title)}`}
-                      className="col-span-2 row-span-2 bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[10%] py-[5%]">
+                      className="col-span-2 row-span-2 bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[10%] py-[5%] flex flex-col">
                      <div className="aspect-[5/6] pt-[5%] pb-5 relative flex justify-center items-center">
                       <BookImage
                         src={getImageUrl(featuredBook.coverImage)}
@@ -355,16 +355,18 @@ const LibraryHomePage = () => {
                         className="w-[80%] h-full object-cover mx-auto shadow-lg"
                       />                     
                     </div>
-                    <div className="pb-4 px-10">
-                      <p className="text-sm text-[#757575] mb-1">{featuredBook.authors.join(', ')}</p>
-                      <h3 className="font-bold text-lg mb-2 line-clamp-2">{featuredBook.title}</h3>
-                      <p className="text-sm text-[#757575] mb-3" style={{ fontStyle: 'italic' }}>
-                        {featuredBook.isAudioBook ? `${featuredBook.category || featuredBook.documentType}` : (featuredBook.category || featuredBook.documentType)}
-                      </p>
-                      <p className="text-xs text-[#757575] line-clamp-3 mb-4">
-                        {featuredBook.description?.content || 'Chưa có mô tả'}
-                      </p>
-                      <div className="flex gap-1 items-center justify-between">
+                    <div className="flex-1 flex flex-col justify-between pb-4 px-10">
+                      <div className="flex-1">
+                        <p className="text-sm text-[#757575] line-clamp-2 min-h-[2.5rem]">{featuredBook.authors.join(', ')}</p>
+                        <h3 className="font-bold text-lg line-clamp-2 min-h-[3rem]">{featuredBook.title}</h3>
+                        <p className="text-sm text-[#757575] mb-3 line-clamp-1 min-h-[1.25rem]" style={{ fontStyle: 'italic' }}>
+                          {featuredBook.isAudioBook ? `${featuredBook.category || featuredBook.documentType}` : (featuredBook.category || featuredBook.documentType)}
+                        </p>
+                        <p className="text-xs text-[#757575] line-clamp-3 mb-4">
+                          {featuredBook.description?.content || 'Chưa có mô tả'}
+                        </p>
+                      </div>
+                      <div className="flex gap-1 items-center justify-between mt-auto">
                         <div>
                         <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3">
                           Xem giới thiệu
@@ -386,7 +388,7 @@ const LibraryHomePage = () => {
                 <Link 
                   key={book._id} 
                   to={`/library/book/${createSlug(book.title)}`}
-                  className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[20%] py-[10%]">
+                  className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm px-[20%] py-[10%] flex flex-col">
                      <div className="aspect-[5/6] pt-[8%] pb-[7%] relative flex justify-center items-center">
                       <BookImage
                         src={getImageUrl(book.coverImage)}
@@ -396,10 +398,12 @@ const LibraryHomePage = () => {
                       />
       
                     </div>
-                    <div className="space-y-3">
-                      <p className="text-sm text-[#757575]">{book.authors.join(', ')}</p>
-                      <h3 className="font-semibold text-lg line-clamp-2">{book.title}</h3>
-                      <div className="flex gap-1 pt-10 items-center justify-between">
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div className="flex-1">
+                        <p className="text-xs text-[#757575] line-clamp-2 min-h-[2.5rem]">{book.authors.join(', ')}</p>
+                        <h3 className="font-semibold text-base line-clamp-2 min-h-[3.5rem]">{book.title}</h3>
+                      </div>
+                      <div className="flex gap-1 items-center justify-between mt-auto">
                         <div>
                         <Button size="sm" variant="ghost" className="font-bold text-[#757575] -ml-3">
                           Mở rộng

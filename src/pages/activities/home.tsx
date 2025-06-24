@@ -299,7 +299,7 @@ const ActivitiesHomePage = () => {
                     let globalImageIndex = 0;
                     
                     return (
-                      <div key={activity._id} className="space-y-6 pb-[10%]">
+                      <div key={activity._id} className="space-y-6 pb-[2%]">
                         {/* Activity Title */}
                         <h2 className="text-2xl font-bold text-[#002855] text-left">
                           {activity.title}
@@ -345,7 +345,7 @@ const ActivitiesHomePage = () => {
                         
                         {/* Days with images - Hiển thị theo ngày */}
                         {activity.days && activity.days.length > 0 && (
-                          <div className="space-y-8 ml-[10%]">
+                          <div className="space-y-4 ml-[10%]">
                             {activity.days
                               // Sắp xếp days theo ngày
                               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())

@@ -388,7 +388,7 @@ const BookDetailPage = () => {
                 )}
                 {/* Hiển thị nội dung mô tả */}
                 {bookDetail?.description?.content ? (
-                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2">
+                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
                     <p>{bookDetail.description.content}</p>
                   </div>
                 ) : (
@@ -407,7 +407,7 @@ const BookDetailPage = () => {
               <div className="items-center justify-center text-center">
                 {/* Hiển thị link embed nếu có */}
                 {bookDetail?.introduction?.linkEmbed && (
-                  <div className="mb-6">
+                  <div className="mb-10">
                     <div className="relative">
                       <iframe
                         src={getEmbedUrl(bookDetail.introduction.linkEmbed)}
@@ -420,23 +420,12 @@ const BookDetailPage = () => {
                           console.warn('Failed to load embed content');
                         }}
                       />
-                      {/* Fallback message nếu không load được */}
-                      <div className="absolute bottom-2 right-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-xs opacity-75 hover:opacity-100"
-                          onClick={() => window.open(bookDetail.introduction?.linkEmbed, '_blank')}
-                        >
-                          Mở link gốc
-                        </Button>
-                      </div>
                     </div>
                   </div>
                 )}
                 {/* Hiển thị nội dung giới thiệu */}
                 {bookDetail?.introduction?.content ? (
-                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2">
+                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
                     <p>{bookDetail.introduction.content}</p>
                   </div>
                 ) : (
@@ -478,7 +467,7 @@ const BookDetailPage = () => {
                     
                     {/* Hiển thị nội dung mô tả sách nói */}
                     {bookDetail?.audioBook?.content && (
-                      <div className="w-[70%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 mt-10 border-b border-[#DDDDDD] pb-10">
+                      <div className="w-[80%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 mt-10 border-b border-[#DDDDDD] pb-10">
                         <p>{bookDetail.audioBook.content}</p>
                       </div>
                     )}
