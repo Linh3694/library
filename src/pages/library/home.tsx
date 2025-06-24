@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { createSlug, getImageUrl } from '../../lib/utils';
@@ -91,11 +91,12 @@ const BookImage = ({
 };
 
 const LibraryHomePage = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [isBookNew, setIsBookNew] = useState(false);
-  const [isFeaturedBook, setIsFeaturedBook] = useState(false);
-  const [isAudioBook, setIsAudioBook] = useState(false);
+  const [isBookNew, setIsBookNew] = useState(searchParams.get('filter') === 'new');
+  const [isFeaturedBook, setIsFeaturedBook] = useState(searchParams.get('filter') === 'featured');
+  const [isAudioBook, setIsAudioBook] = useState(searchParams.get('filter') === 'audio');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('Mới nhất');
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
@@ -108,6 +109,11 @@ const LibraryHomePage = () => {
 
   const booksPerPage = 20;
   const sortOptions = ['Mới nhất', 'Cũ nhất', 'A-Z', 'Z-A'];
+
+  // Scroll to top khi component mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   // Load dữ liệu từ API
   useEffect(() => {
@@ -134,6 +140,11 @@ const LibraryHomePage = () => {
     // The actual filtering happens in filteredBooks
   };
 
+  // Reset to first page when sortBy or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortBy, isBookNew, isFeaturedBook, isAudioBook, selectedCategories]);
+
   const filteredBooks = books.filter((library: Library) => {
     const matchesSearch = library.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          library.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -145,7 +156,8 @@ const LibraryHomePage = () => {
                            );
     
     const matchesBookType = (!isFeaturedBook || library.isFeaturedBook) &&
-                           (!isAudioBook || library.isAudioBook);
+                           (!isAudioBook || library.isAudioBook) &&
+                           (!isBookNew || library.isNewBook);
     
     return matchesSearch && matchesCategory && matchesBookType;
   });
@@ -154,14 +166,20 @@ const LibraryHomePage = () => {
   const sortedBooks = [...filteredBooks].sort((a: Library, b: Library) => {
     switch (sortBy) {
       case 'Cũ nhất':
-        return (a.publishYear || 0) - (b.publishYear || 0);
+        // Sách không có năm xuất bản sẽ được xếp cuối
+        const yearA = a.publishYear || Number.MAX_SAFE_INTEGER;
+        const yearB = b.publishYear || Number.MAX_SAFE_INTEGER;
+        return yearA - yearB;
       case 'A-Z':
-        return a.title.localeCompare(b.title);
+        return a.title.localeCompare(b.title, 'vi', { sensitivity: 'base' });
       case 'Z-A':
-        return b.title.localeCompare(a.title);
+        return b.title.localeCompare(a.title, 'vi', { sensitivity: 'base' });
       case 'Mới nhất':
       default:
-        return (b.publishYear || 0) - (a.publishYear || 0);
+        // Sách không có năm xuất bản sẽ được xếp cuối
+        const newYearA = a.publishYear || 0;
+        const newYearB = b.publishYear || 0;
+        return newYearB - newYearA;
     }
   });
 

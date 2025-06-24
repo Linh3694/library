@@ -81,9 +81,12 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
             <div className="w-full mx-auto flex items-center justify-between gap-4">
               <h2 className="text-5xl font-extrabold text-[#002855]">SÁCH NÓI</h2>
               <div className="ml-auto mr-20">
-                <button className="text-[#F05023] font-extrabold hover:text-orange-600 transition-colors">
+                <Link 
+                  to="/library?filter=audio" 
+                  className="text-[#F05023] font-extrabold hover:text-orange-600 transition-colors"
+                >
                   XEM THÊM
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -116,12 +119,12 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                           <img 
                             src={getImageUrl(library.coverImage)} 
                             alt={library.title}
-                            className="w-full h-full object-cover rounded-4xl shadow-lg border-4 border-white/20"
+                            className="w-full h-full object-cover rounded-4xl shadow-lg border-2 border-white/20"
                           />
                         ) : (
                           <div className="w-full h-full rounded-4xl shadow-lg border-2 border-white flex flex-col items-center justify-center text-white font-bold text-center p-4 relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600">
                             <div className="text-center">
-                              <div className="text-lg font-bold uppercase leading-tight">
+                              <div className="text-base font-bold uppercase leading-tight">
                                 {library.title}
                               </div>
                               {library.totalBooks && (
@@ -142,7 +145,7 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                             alt="Micro" 
                             className="w-8 h-8 mr-2 flex-shrink-0"
                           />
-                          <span className="font-bold uppercase text-lg break-words whitespace-normal leading-tight">{library.title}</span>
+                          <span className="font-bold uppercase text-base break-words whitespace-normal leading-tight">{library.title}</span>
                         </div>
                       </div>
                     </>
@@ -159,7 +162,7 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                             alt="Micro" 
                             className="w-8 h-8 mr-2 flex-shrink-0"
                           />
-                          <span className="font-bold uppercase text-lg break-words whitespace-normal leading-tight">{library.title}</span>
+                          <span className="font-bold uppercase text-base break-words whitespace-normal leading-tight">{library.title}</span>
                         </div>
                       </div>
 
@@ -169,7 +172,7 @@ const AudioBooks: React.FC<AudioBooksProps> = ({ className }) => {
                           <img 
                             src={getImageUrl(library.coverImage)} 
                             alt={library.title}
-                            className="w-full h-full object-cover rounded-4xl shadow-lg border-4 border-white/20"
+                            className="w-full h-full object-cover rounded-4xl shadow-lg border-2 border-white/20"
                           />
                         ) : (
                           <div className="w-full h-full rounded-4xl shadow-md flex flex-col items-center justify-center text-white font-bold text-center p-3 relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600">

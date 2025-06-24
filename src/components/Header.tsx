@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className={cn(
-      "w-full bg-white bg-blend-saturation bg-opacity-50 backdrop-blur-sm ",
+      "w-full bg-white bg-blend-saturation bg-opacity-87 backdrop-blur-[25px] ",
       className
     )}>
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-40">

@@ -114,7 +114,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                     <img 
                       src={getImageUrl(featuredLibraries[0].coverImage)} 
                       alt={featuredLibraries[0].title}
-                      className="w-full h-full object-cover rounded-lg shadow-2xl"
+                      className="w-full h-full object-cover rounded-2xl shadow-2xl border-2 border-white"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center rounded-lg shadow-2xl">
@@ -176,18 +176,18 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
           <div className="relative">
             {/* Main Circle */}
             <div 
-              className="w-80 h-80 rounded-full border-4 border-[#F05023] flex items-center justify-center bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer group"
-              onClick={() => navigate('/library')}
+              className="w-80 h-80 lg:w-64 lg:h-64 rounded-full border-4 border-[#F05023] flex items-center justify-center bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer group"
+              onClick={() => navigate('/library?filter=featured')}
             >
               <div className="text-center">
-                <h3 className="text-4xl font-extrabold text-[#F05023]">
+                <h3 className="text-4xl lg:text-3xl font-extrabold text-[#F05023]">
                   KHÁM PHÁ
                 </h3>
               </div>
             </div>
             {/* Arrow Icon - Top Right Corner */}
-            <div className="absolute -top-2 -right-2 w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="absolute -top-2 -right-2 w-12 h-12 lg:w-10 lg:h-10 bg-gray-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <svg className="w-6 h-6 lg:w-5 lg:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
               </svg>
             </div>
@@ -247,7 +247,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                           <img 
                             src={getImageUrl(featuredLibraries[1].coverImage)} 
                             alt={featuredLibraries[1].title}
-                            className="w-full h-full object-cover rounded-lg shadow-xl"
+                            className="w-full h-full object-cover rounded-2xl shadow-xl border-2 border-white"
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center rounded-lg shadow-xl">
@@ -300,7 +300,7 @@ const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
                           <img 
                             src={getImageUrl(featuredLibraries[2].coverImage)} 
                             alt={featuredLibraries[2].title}
-                            className="w-full h-full object-cover rounded-4xl shadow-xl"
+                            className="w-full h-full object-cover rounded-2xl shadow-xl border-2 border-white"
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-300 flex items-center justify-center rounded-lg shadow-xl">

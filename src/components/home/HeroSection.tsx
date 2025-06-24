@@ -25,7 +25,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
           <div className="flex items-center justify-center gap-10 relative">
             {/* Left Image */}
             <div className="relative mt-[15%]">
-              <div className="w-96 h-96 rounded-full overflow-hidden border-4 border-white shadow-lg">
+              <div className="w-96 h-96 rounded-full overflow-hidden shadow-lg">
                 <img 
                   src="/hero-01.png" 
                   alt="Library Scene 1" 
@@ -46,7 +46,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
 
             {/* Right Image */}
             <div className="relative mb-[15%]">
-              <div className="w-96 h-96 rounded-full overflow-hidden border-4 border-white shadow-lg">
+              <div className="w-96 h-96 rounded-full overflow-hidden shadow-lg">
                 <img 
                   src="/hero-02.jpg" 
                   alt="Library Scene 2" 

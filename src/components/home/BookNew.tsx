@@ -94,9 +94,12 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
             <div className="w-full mx-auto flex items-center justify-between gap-4">
                 <h2 className="text-5xl font-extrabold text-[#002855]">SÁCH MỚI</h2>
                 <div className="ml-auto mr-20">
-                <button className="text-[#F05023] font-extrabold hover:text-orange-600 transition-colors">
+                <Link 
+                  to="/library?filter=new" 
+                  className="text-[#F05023] font-extrabold hover:text-orange-600 transition-colors"
+                >
                     XEM THÊM
-                </button>
+                </Link>
             </div>
             </div>
          </div>
@@ -142,7 +145,7 @@ const BookNew: React.FC<BookNewProps> = ({ className }) => {
                   <img 
                     src={getImageUrl(library.coverImage)} 
                     alt={library.title}
-                    className="w-full h-full object-cover rounded-lg shadow-lg"
+                    className="w-full h-full object-cover rounded-2xl shadow-lg border-2 border-white"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center rounded-lg shadow-lg">

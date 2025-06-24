@@ -120,6 +120,27 @@ const BookDetailPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [slug]);
 
+  // Helper functions to check if tab has content
+  const hasDescriptionContent = (book: BookDetail) => {
+    return book?.description?.content || book?.description?.linkEmbed;
+  };
+
+  const hasIntroductionContent = (book: BookDetail) => {
+    return book?.introduction?.content || book?.introduction?.linkEmbed;
+  };
+
+  const hasAudioBookContent = (book: BookDetail) => {
+    return book?.isAudioBook && (book?.audioBook?.content || book?.audioBook?.linkEmbed);
+  };
+
+  // Get first available tab
+  const getFirstAvailableTab = (book: BookDetail) => {
+    if (hasDescriptionContent(book)) return 'description';
+    if (hasIntroductionContent(book)) return 'introduction';
+    if (hasAudioBookContent(book)) return 'audiobook';
+    return 'description'; // fallback
+  };
+
   // Fetch book detail by slug
   useEffect(() => {
     const fetchBookDetail = async () => {
@@ -132,6 +153,9 @@ const BookDetailPage = () => {
         // Try to fetch book by slug first
         const book = await libraryAPI.getBookDetailBySlug(slug);
         setBookDetail(book);
+        
+        // Set active tab to first available tab with content
+        setActiveTab(getFirstAvailableTab(book));
         
         // Fetch related books
         try {
@@ -326,158 +350,141 @@ const BookDetailPage = () => {
 
         {/* Book Description Tabs */}
         <div className="mb-12">
-          {/* Tab Navigation */}
-          <div className="flex justify-center mb-6">
-            <div className="flex rounded-full p-1 gap-4">
-              <button
-                onClick={() => setActiveTab('description')}
-                className={`w-36 px-6 py-2 rounded-full text-sm transition-all ${
-                  activeTab === 'description'
-                    ? 'bg-[#E6EEF6] text-[#002855] font-bold'
-                    : 'text-[#757575] bg-[#F6F6F6]'
-                }`}
-              >
-                Mô tả
-              </button>
-              <button
-                onClick={() => setActiveTab('introduction')}
-                className={`w-36 px-2 py-2 rounded-full text-sm transition-all ${
-                  activeTab === 'introduction'
-                     ? 'bg-[#E6EEF6] text-[#002855] font-bold'
-                    : 'text-[#757575] bg-[#F6F6F6]'
-                }`}
-              >
-                Giới thiệu sách
-              </button>
-              {bookDetail?.isAudioBook && (
-                <button
-                  onClick={() => setActiveTab('audiobook')}
-                  className={`w-36 px-6 py-2 rounded-full text-sm transition-all ${
-                    activeTab === 'audiobook'
-                      ? 'bg-[#E6EEF6] text-[#002855] font-bold'
-                      : 'text-[#757575] bg-[#F6F6F6]'
-                  }`}
-                >
-                  Sách Nói
-                </button>
+          {/* Tab Navigation - Only show if there are any tabs with content */}
+          {(hasDescriptionContent(bookDetail) || hasIntroductionContent(bookDetail) || hasAudioBookContent(bookDetail)) && (
+            <div className="flex justify-center mb-6">
+              <div className="flex rounded-full p-1 gap-4">
+                {hasDescriptionContent(bookDetail) && (
+                  <button
+                    onClick={() => setActiveTab('description')}
+                    className={`w-36 px-6 py-2 rounded-full text-sm transition-all ${
+                      activeTab === 'description'
+                        ? 'bg-[#E6EEF6] text-[#002855] font-bold'
+                        : 'text-[#757575] bg-[#F6F6F6]'
+                    }`}
+                  >
+                    Mô tả
+                  </button>
+                )}
+                {hasIntroductionContent(bookDetail) && (
+                  <button
+                    onClick={() => setActiveTab('introduction')}
+                    className={`w-36 px-2 py-2 rounded-full text-sm transition-all ${
+                      activeTab === 'introduction'
+                         ? 'bg-[#E6EEF6] text-[#002855] font-bold'
+                        : 'text-[#757575] bg-[#F6F6F6]'
+                    }`}
+                  >
+                    Giới thiệu sách
+                  </button>
+                )}
+                {hasAudioBookContent(bookDetail) && (
+                  <button
+                    onClick={() => setActiveTab('audiobook')}
+                    className={`w-36 px-6 py-2 rounded-full text-sm transition-all ${
+                      activeTab === 'audiobook'
+                        ? 'bg-[#E6EEF6] text-[#002855] font-bold'
+                        : 'text-[#757575] bg-[#F6F6F6]'
+                    }`}
+                  >
+                    Sách Nói
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Tab Content - Only show if there are tabs with content */}
+          {(hasDescriptionContent(bookDetail) || hasIntroductionContent(bookDetail) || hasAudioBookContent(bookDetail)) && (
+            <div>
+              {activeTab === 'description' && hasDescriptionContent(bookDetail) && (
+                <div className="items-center justify-center text-center">
+                  {/* Hiển thị link embed nếu có */}
+                  {bookDetail?.description?.linkEmbed && (
+                    <div className="mb-10">
+                      <div className="relative">
+                        <iframe
+                          src={getEmbedUrl(bookDetail.description.linkEmbed)}
+                          className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
+                          title={`Embed: ${bookDetail.title}`}
+                          allow="autoplay; encrypted-media"
+                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                          loading="lazy"
+                          onError={() => {
+                            console.warn('Failed to load embed content');
+                          }}
+                        />                    
+                      </div>
+                    </div>
+                  )}
+                  {/* Hiển thị nội dung mô tả */}
+                  {bookDetail?.description?.content && (
+                    <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
+                      <p>{bookDetail.description.content}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {activeTab === 'introduction' && hasIntroductionContent(bookDetail) && (
+                <div className="items-center justify-center text-center">
+                  {/* Hiển thị link embed nếu có */}
+                  {bookDetail?.introduction?.linkEmbed && (
+                    <div className="mb-10">
+                      <div className="relative">
+                        <iframe
+                          src={getEmbedUrl(bookDetail.introduction.linkEmbed)}
+                          className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
+                          title={`Giới thiệu: ${bookDetail.title}`}
+                          allow="autoplay; encrypted-media"
+                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                          loading="lazy"
+                          onError={() => {
+                            console.warn('Failed to load embed content');
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {/* Hiển thị nội dung giới thiệu */}
+                  {bookDetail?.introduction?.content && (
+                    <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
+                      <p>{bookDetail.introduction.content}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {activeTab === 'audiobook' && hasAudioBookContent(bookDetail) && (
+                <div className="items-center justify-center text-center">
+                  {/* Hiển thị link embed nếu có */}
+                  {bookDetail?.audioBook?.linkEmbed && (
+                    <div className="mb-10">
+                      <div className="relative">
+                        <iframe
+                          src={getEmbedUrl(bookDetail.audioBook.linkEmbed)}
+                          className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
+                          title={`Audiobook: ${bookDetail.title}`}
+                          allow="autoplay; encrypted-media"
+                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                          loading="lazy"
+                          onError={() => {
+                            console.warn('Failed to load embed content');
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {/* Hiển thị nội dung mô tả sách nói */}
+                  {bookDetail?.audioBook?.content && (
+                    <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
+                      <p>{bookDetail.audioBook.content}</p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-          </div>
-
-          {/* Tab Content */}
-          <div>
-            {activeTab === 'description' ? (
-              <div className="items-center justify-center text-center">
-                {/* Hiển thị link embed nếu có */}
-                {bookDetail?.description?.linkEmbed && (
-                  <div className="mb-10">
-                    <div className="relative">
-                      <iframe
-                        src={getEmbedUrl(bookDetail.description.linkEmbed)}
-                        className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
-                        title={`Embed: ${bookDetail.title}`}
-                        allow="autoplay; encrypted-media"
-                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                        loading="lazy"
-                        onError={() => {
-                          console.warn('Failed to load embed content');
-                        }}
-                      />                    
-                    </div>
-                  </div>
-                )}
-                {/* Hiển thị nội dung mô tả */}
-                {bookDetail?.description?.content ? (
-                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
-                    <p>{bookDetail.description.content}</p>
-                  </div>
-                ) : (
-                  <div className="w-full p-12 text-center">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                      </svg>
-                    </div>
-                    <h4 className="text-lg font-medium text-gray-700 mb-2">Chưa có mô tả</h4>
-                  
-                  </div>
-                )}
-              </div>
-            ) : activeTab === 'introduction' ? (
-              <div className="items-center justify-center text-center">
-                {/* Hiển thị link embed nếu có */}
-                {bookDetail?.introduction?.linkEmbed && (
-                  <div className="mb-10">
-                    <div className="relative">
-                      <iframe
-                        src={getEmbedUrl(bookDetail.introduction.linkEmbed)}
-                        className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
-                        title={`Giới thiệu: ${bookDetail.title}`}
-                        allow="autoplay; encrypted-media"
-                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                        loading="lazy"
-                        onError={() => {
-                          console.warn('Failed to load embed content');
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-                {/* Hiển thị nội dung giới thiệu */}
-                {bookDetail?.introduction?.content ? (
-                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
-                    <p>{bookDetail.introduction.content}</p>
-                  </div>
-                ) : (
-                  <div className="w-full  p-12 text-center">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
-                      </svg>
-                    </div>
-                    <h4 className="text-lg font-medium text-gray-700 mb-2">Chưa có giới thiệu</h4>
-                    
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="items-center justify-center text-center">
-                {/* Hiển thị link embed nếu có */}
-                {bookDetail?.audioBook?.linkEmbed && (
-                  <div className="mb-10">
-                    <div className="relative">
-                      <iframe
-                        src={getEmbedUrl(bookDetail.audioBook.linkEmbed)}
-                        className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
-                        title={`Audiobook: ${bookDetail.title}`}
-                        allow="autoplay; encrypted-media"
-                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                        loading="lazy"
-                        onError={() => {
-                          console.warn('Failed to load embed content');
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-                {/* Hiển thị nội dung mô tả sách nói */}
-                {bookDetail?.audioBook?.content ? (
-                  <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
-                    <p>{bookDetail.audioBook.content}</p>
-                  </div>
-                ) : (
-                  <div className="w-full p-12 text-center">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                    </div>
-                    <h4 className="text-lg font-medium text-gray-700 mb-2">Chưa có link sách nói</h4>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Related Books Section */}
