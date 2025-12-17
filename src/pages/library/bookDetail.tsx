@@ -14,6 +14,7 @@ import {
   BreadcrumbPage,
 } from '../../components/ui/breadcrumb';
 import { Pagination } from '../../components/ui/pagination';
+import ReactMarkdown from 'react-markdown';
 
 // Interface cho book detail từ API
 interface BookDetail {
@@ -23,16 +24,8 @@ interface BookDetail {
   title: string;
   authors?: string[];
   author?: string; // Fallback field
-  // Cấu trúc mới cho 3 tab từ admin
+  // Cấu trúc mới cho mô tả từ admin
   description?: {
-    linkEmbed?: string;
-    content?: string;
-  };
-  introduction?: {
-    linkEmbed?: string;
-    content?: string;
-  };
-  audioBook?: {
     linkEmbed?: string;
     content?: string;
   };
@@ -74,7 +67,6 @@ const BookDetailPage = () => {
   const [relatedBooks, setRelatedBooks] = useState<RelatedBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'description' | 'introduction' | 'audiobook'>('description');
   const booksPerPage = 5;
 
   // Handle click on related book
@@ -83,62 +75,56 @@ const BookDetailPage = () => {
     navigate(`/library/book/${bookSlug}`);
   };
 
-  // Helper function to convert URLs to embeddable format
-  const getEmbedUrl = (url: string): string => {
-    if (!url) return '';
-    
-    // YouTube URL conversion
-    const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/;
-    const youtubeMatch = url.match(youtubeRegex);
-    if (youtubeMatch) {
-      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
-    }
-    
-    // Spotify URL conversion
-    const spotifyRegex = /https?:\/\/open\.spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/;
-    const spotifyMatch = url.match(spotifyRegex);
-    if (spotifyMatch) {
-      return `https://open.spotify.com/embed/${spotifyMatch[1]}/${spotifyMatch[2]}`;
-    }
-    
-    // SoundCloud - keep as is (usually works with embed)
-    if (url.includes('soundcloud.com')) {
-      return url;
-    }
-    
-    // Voiz FM - keep as is
-    if (url.includes('voiz.vn')) {
-      return url;
-    }
-    
-    // Default: return original URL
-    return url;
-  };
-
   // Scroll to top when page loads
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [slug]);
 
-  // Helper functions to check if tab has content
+  // Helper function to check if has description content
   const hasDescriptionContent = (book: BookDetail) => {
     return book?.description?.content || book?.description?.linkEmbed;
   };
 
-  const hasIntroductionContent = (book: BookDetail) => {
-    return book?.introduction?.content || book?.introduction?.linkEmbed;
-  };
+  // Helper function to convert URLs to embeddable format for video
+  const renderVideoEmbed = (href: string) => {
+    // YouTube
+    const youtubeMatch = href.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+    if (youtubeMatch) {
+      const videoId = youtubeMatch[1];
+      return (
+        <div className="my-6">
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden shadow-md">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}`}
+              title="YouTube video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute top-0 left-0 w-full h-full"
+            />
+          </div>
+        </div>
+      );
+    }
 
-  const hasAudioBookContent = (book: BookDetail) => {
-    return book?.isAudioBook && (book?.audioBook?.content || book?.audioBook?.linkEmbed);
-  };
+    // Spotify
+    const spotifyMatch = href.match(/spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
+    if (spotifyMatch) {
+      const [, type, id] = spotifyMatch;
+      return (
+        <div className="my-6">
+          <div className="relative w-full rounded-lg overflow-hidden shadow-md" style={{ height: type === 'track' || type === 'episode' ? '152px' : '380px' }}>
+            <iframe
+              src={`https://open.spotify.com/embed/${type}/${id}`}
+              title="Spotify embed"
+              allow="encrypted-media"
+              className="absolute top-0 left-0 w-full h-full"
+            />
+          </div>
+        </div>
+      );
+    }
 
-  // Get first available tab
-  const getFirstAvailableTab = (book: BookDetail) => {
-    if (hasDescriptionContent(book)) return 'description';
-    if (hasIntroductionContent(book)) return 'introduction';
-    if (hasAudioBookContent(book)) return 'audiobook';
-    return 'description'; // fallback
+    return null;
   };
 
   // Fetch book detail by slug
@@ -154,12 +140,16 @@ const BookDetailPage = () => {
         const book = await libraryAPI.getBookDetailBySlug(slug);
         setBookDetail(book);
         
-        // Set active tab to first available tab with content
-        setActiveTab(getFirstAvailableTab(book));
-        
-        // Fetch related books
+        // Fetch related books với nhiều tiêu chí
         try {
-          const related = await libraryAPI.getRelatedBooks(book.category || book.documentType || '', 10);
+          const related = await libraryAPI.getRelatedBooks(
+            book._id || book.libraryId || '',
+            book.category || '', 
+            book.seriesName || '',
+            book.documentType || '',
+            book.authors || [],
+            10
+          );
           setRelatedBooks(related);
         } catch (relatedError) {
           console.warn('Could not fetch related books:', relatedError);
@@ -269,7 +259,7 @@ const BookDetailPage = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Tương lai sau đại dịch Covid</BreadcrumbPage>
+              <BreadcrumbPage>{bookDetail?.title || 'Chi tiết sách'}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -304,28 +294,39 @@ const BookDetailPage = () => {
               <h1 className="text-3xl font-bold text-[#002855] mb-2">
                 {bookDetail.title}
               </h1>
-              <p className="text-lg text-[#757575] mb-4">
-                {bookDetail.authors?.join(", ") || bookDetail.author || "Chưa có thông tin tác giả"}
-              </p>
             </div>
 
             {/* Book Details */}
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-[#002855] font-semibold">Năm xuất bản</span>
-                <p className="font-medium text-[#757575] mt-3">{bookDetail.publishYear || "Chưa cập nhật"}</p>
+                <span className="text-[#002855] font-semibold">Tác giả</span>
+                <p className="font-medium text-[#757575] mt-3">
+                  {bookDetail.authors?.join(", ") || "Chưa có thông tin"}
+                </p>
+              </div>
+              <div>
+                <span className="text-[#002855] font-semibold">Phân loại tài liệu</span>
+                <p className="font-medium text-[#757575] mt-3">{bookDetail.documentType || "Chưa phân loại"}</p>
+              </div>
+              <div>
+                <span className="text-[#002855] font-semibold">Chủ đề</span>
+                <p className="font-medium text-[#757575] mt-3">{bookDetail.seriesName || "Chưa có"}</p>
               </div>
               <div>
                 <span className="text-[#002855] font-semibold">Thể loại</span>
-                <p className="font-medium text-[#757575] mt-3">{bookDetail.genre || bookDetail.category || bookDetail.documentType || "Chưa phân loại"}</p>
-              </div>
-              <div>
-                <span className="text-[#002855] font-semibold">Số lượt mượn</span>
-                <p className="font-medium text-[#757575] mt-3">{bookDetail.totalBorrowCount || bookDetail.borrowCount || 0} lượt</p>
+                <p className="font-medium text-[#757575] mt-3">{bookDetail.category || "Chưa có"}</p>
               </div>
               <div>
                 <span className="text-[#002855] font-semibold">Ngôn ngữ</span>
                 <p className="font-medium text-[#757575] mt-3">{bookDetail.language || "Tiếng Việt"}</p>
+              </div>
+              <div>
+                <span className="text-[#002855] font-semibold">Năm xuất bản</span>
+                <p className="font-medium text-[#757575] mt-3">{bookDetail.publishYear || "Chưa cập nhật"}</p>
+              </div>
+              <div>
+                <span className="text-[#002855] font-semibold">Số lượt mượn</span>
+                <p className="font-medium text-[#757575] mt-3">{bookDetail.totalBorrowCount || bookDetail.borrowCount || 0} lượt</p>
               </div>
             </div>
           </div>
@@ -348,144 +349,61 @@ const BookDetailPage = () => {
           </div>
         </div>
 
-        {/* Book Description Tabs */}
-        <div className="mb-12">
-          {/* Tab Navigation - Only show if there are any tabs with content */}
-          {(hasDescriptionContent(bookDetail) || hasIntroductionContent(bookDetail) || hasAudioBookContent(bookDetail)) && (
+        {/* Book Description Section - Chỉ hiển thị Mô tả */}
+        {hasDescriptionContent(bookDetail) && (
+          <div className="mb-12">
+            {/* Title */}
             <div className="flex justify-center mb-6">
-              <div className="flex rounded-full p-1 gap-4">
-                {hasDescriptionContent(bookDetail) && (
-                  <button
-                    onClick={() => setActiveTab('description')}
-                    className={`w-36 px-6 py-2 rounded-full text-sm transition-all ${
-                      activeTab === 'description'
-                        ? 'bg-[#E6EEF6] text-[#002855] font-bold'
-                        : 'text-[#757575] bg-[#F6F6F6]'
-                    }`}
-                  >
-                    Mô tả
-                  </button>
-                )}
-                {hasIntroductionContent(bookDetail) && (
-                  <button
-                    onClick={() => setActiveTab('introduction')}
-                    className={`w-36 px-2 py-2 rounded-full text-sm transition-all ${
-                      activeTab === 'introduction'
-                         ? 'bg-[#E6EEF6] text-[#002855] font-bold'
-                        : 'text-[#757575] bg-[#F6F6F6]'
-                    }`}
-                  >
-                    Giới thiệu sách
-                  </button>
-                )}
-                {hasAudioBookContent(bookDetail) && (
-                  <button
-                    onClick={() => setActiveTab('audiobook')}
-                    className={`w-36 px-6 py-2 rounded-full text-sm transition-all ${
-                      activeTab === 'audiobook'
-                        ? 'bg-[#E6EEF6] text-[#002855] font-bold'
-                        : 'text-[#757575] bg-[#F6F6F6]'
-                    }`}
-                  >
-                    Sách Nói
-                  </button>
-                )}
+              <div className="bg-[#E6EEF6] text-[#002855] font-bold px-6 py-2 rounded-full text-sm">
+                Mô tả
               </div>
             </div>
-          )}
 
-          {/* Tab Content - Only show if there are tabs with content */}
-          {(hasDescriptionContent(bookDetail) || hasIntroductionContent(bookDetail) || hasAudioBookContent(bookDetail)) && (
-            <div>
-              {activeTab === 'description' && hasDescriptionContent(bookDetail) && (
-                <div className="items-center justify-center text-center">
-                  {/* Hiển thị link embed nếu có */}
-                  {bookDetail?.description?.linkEmbed && (
-                    <div className="mb-10">
-                      <div className="relative">
-                        <iframe
-                          src={getEmbedUrl(bookDetail.description.linkEmbed)}
-                          className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
-                          title={`Embed: ${bookDetail.title}`}
-                          allow="autoplay; encrypted-media"
-                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                          loading="lazy"
-                          onError={() => {
-                            console.warn('Failed to load embed content');
-                          }}
-                        />                    
-                      </div>
-                    </div>
-                  )}
-                  {/* Hiển thị nội dung mô tả */}
-                  {bookDetail?.description?.content && (
-                    <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
-                      <p>{bookDetail.description.content}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {activeTab === 'introduction' && hasIntroductionContent(bookDetail) && (
-                <div className="items-center justify-center text-center">
-                  {/* Hiển thị link embed nếu có */}
-                  {bookDetail?.introduction?.linkEmbed && (
-                    <div className="mb-10">
-                      <div className="relative">
-                        <iframe
-                          src={getEmbedUrl(bookDetail.introduction.linkEmbed)}
-                          className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
-                          title={`Giới thiệu: ${bookDetail.title}`}
-                          allow="autoplay; encrypted-media"
-                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                          loading="lazy"
-                          onError={() => {
-                            console.warn('Failed to load embed content');
-                          }}
+            {/* Content - Markdown */}
+            <div className="w-[60%] mx-auto">
+              {bookDetail?.description?.content && (
+                <div className="prose prose-lg max-w-none text-justify border-b border-[#DDDDDD] pb-10">
+                  <ReactMarkdown
+                    components={{
+                      h1: (props) => <h1 className="text-2xl font-bold text-[#002855] mb-4 mt-6" {...props} />,
+                      h2: (props) => <h2 className="text-xl font-bold text-[#002855] mb-3 mt-5" {...props} />,
+                      h3: (props) => <h3 className="text-lg font-bold text-[#002855] mb-2 mt-4" {...props} />,
+                      p: ({ children, ...props }) => {
+                        // Check if paragraph contains a video link
+                        if (typeof children === 'string') {
+                          const videoEmbed = renderVideoEmbed(children.trim());
+                          if (videoEmbed) return videoEmbed;
+                        }
+                        return <p className="text-[#757575] leading-relaxed mb-4 text-sm font-semibold" {...props}>{children}</p>;
+                      },
+                      ul: (props) => <ul className="list-disc list-inside mb-4 space-y-2" {...props} />,
+                      ol: (props) => <ol className="list-decimal list-inside mb-4 space-y-2" {...props} />,
+                      li: (props) => <li className="text-[#757575] text-sm" {...props} />,
+                      blockquote: (props) => (
+                        <blockquote className="border-l-4 border-gray-300 pl-4 italic text-gray-600 my-4" {...props} />
+                      ),
+                      a: ({ href, ...props }) => {
+                        const videoEmbed = renderVideoEmbed(href || '');
+                        if (videoEmbed) return videoEmbed;
+                        return <a className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer" href={href} {...props} />;
+                      },
+                      img: ({ src, alt, ...props }) => (
+                        <img 
+                          className="rounded-lg shadow-md my-6 max-w-full h-auto mx-auto" 
+                          src={getImageUrl(src)}
+                          alt={alt}
+                          {...props} 
                         />
-                      </div>
-                    </div>
-                  )}
-                  {/* Hiển thị nội dung giới thiệu */}
-                  {bookDetail?.introduction?.content && (
-                    <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
-                      <p>{bookDetail.introduction.content}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {activeTab === 'audiobook' && hasAudioBookContent(bookDetail) && (
-                <div className="items-center justify-center text-center">
-                  {/* Hiển thị link embed nếu có */}
-                  {bookDetail?.audioBook?.linkEmbed && (
-                    <div className="mb-10">
-                      <div className="relative">
-                        <iframe
-                          src={getEmbedUrl(bookDetail.audioBook.linkEmbed)}
-                          className="w-[60%] h-[480px] border-0 rounded-lg mx-auto"
-                          title={`Audiobook: ${bookDetail.title}`}
-                          allow="autoplay; encrypted-media"
-                          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                          loading="lazy"
-                          onError={() => {
-                            console.warn('Failed to load embed content');
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  {/* Hiển thị nội dung mô tả sách nói */}
-                  {bookDetail?.audioBook?.content && (
-                    <div className="w-[50%] mx-auto text-justify font-semibold text-sm text-[#757575] leading-relaxed space-y-2 border-b border-[#DDDDDD] pb-10">
-                      <p>{bookDetail.audioBook.content}</p>
-                    </div>
-                  )}
+                      ),
+                    }}
+                  >
+                    {bookDetail.description.content}
+                  </ReactMarkdown>
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Related Books Section */}
         <div>
@@ -493,8 +411,14 @@ const BookDetailPage = () => {
             Có thể bạn cũng thích
           </h2>
           
-          <div className="grid grid-cols-5 gap-6 mb-8">
-            {currentRelatedBooks.map((book) => (
+          {currentRelatedBooks.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Chưa có sách liên quan</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-5 gap-6 mb-8">
+                {currentRelatedBooks.map((book) => (
               <div 
                 key={book._id} 
                 className="bg-[#f6f6f6] rounded-[70px] overflow-hidden shadow-sm p-8 cursor-pointer hover:shadow-md transition-all duration-200 hover:bg-[#f0f0f0]"
@@ -547,21 +471,23 @@ const BookDetailPage = () => {
                       </div>
                 </div>
               </div>
-            ))}
-          </div>
+                ))}
+              </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                showPrevNext={true}
-                showFirstLast={false}
-                maxVisiblePages={5}
-              />
-            </div>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    showPrevNext={true}
+                    showFirstLast={false}
+                    maxVisiblePages={5}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

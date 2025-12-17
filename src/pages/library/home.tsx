@@ -37,6 +37,15 @@ const getUniqueCategories = (books: Library[]) => {
   return ['Tất cả', ...Array.from(categories)];
 };
 
+// Lấy danh sách chủ đề duy nhất
+const getUniqueSeries = (books: Library[]) => {
+  const series = new Set<string>();
+  books.forEach(book => {
+    if (book.seriesName) series.add(book.seriesName);
+  });
+  return Array.from(series);
+};
+
 
 
 // Component Image wrapper để handle loading state
@@ -94,12 +103,14 @@ const LibraryHomePage = () => {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSeries, setSelectedSeries] = useState<string[]>([]);
   const [isBookNew, setIsBookNew] = useState(searchParams.get('filter') === 'new');
   const [isFeaturedBook, setIsFeaturedBook] = useState(searchParams.get('filter') === 'featured');
   const [isAudioBook, setIsAudioBook] = useState(searchParams.get('filter') === 'audio');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('Mới nhất');
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
+  const [isSeriesOpen, setIsSeriesOpen] = useState(true);
   const [isGenreOpen, setIsGenreOpen] = useState(true);
   
   // Thêm state cho API data
@@ -143,7 +154,7 @@ const LibraryHomePage = () => {
   // Reset to first page when sortBy or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [sortBy, isBookNew, isFeaturedBook, isAudioBook, selectedCategories]);
+  }, [sortBy, isBookNew, isFeaturedBook, isAudioBook, selectedCategories, selectedSeries]);
 
   const filteredBooks = books.filter((library: Library) => {
     const matchesSearch = library.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -155,31 +166,36 @@ const LibraryHomePage = () => {
                              library.documentType?.includes(cat)
                            );
     
+    const matchesSeries = selectedSeries.length === 0 || 
+                         (library.seriesName && selectedSeries.includes(library.seriesName));
+    
     const matchesBookType = (!isFeaturedBook || library.isFeaturedBook) &&
                            (!isAudioBook || library.isAudioBook) &&
                            (!isBookNew || library.isNewBook);
     
-    return matchesSearch && matchesCategory && matchesBookType;
+    return matchesSearch && matchesCategory && matchesSeries && matchesBookType;
   });
 
   // Sắp xếp thư viện
   const sortedBooks = [...filteredBooks].sort((a: Library, b: Library) => {
     switch (sortBy) {
-      case 'Cũ nhất':
-        // Sách không có năm xuất bản sẽ được xếp cuối
-        const yearA = a.publishYear || Number.MAX_SAFE_INTEGER;
-        const yearB = b.publishYear || Number.MAX_SAFE_INTEGER;
-        return yearA - yearB;
+      case 'Cũ nhất': {
+        // Sắp xếp theo ngày thêm vào hệ thống (cũ nhất trước)
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateA - dateB;
+      }
       case 'A-Z':
         return a.title.localeCompare(b.title, 'vi', { sensitivity: 'base' });
       case 'Z-A':
         return b.title.localeCompare(a.title, 'vi', { sensitivity: 'base' });
       case 'Mới nhất':
-      default:
-        // Sách không có năm xuất bản sẽ được xếp cuối
-        const newYearA = a.publishYear || 0;
-        const newYearB = b.publishYear || 0;
-        return newYearB - newYearA;
+      default: {
+        // Sắp xếp theo ngày thêm vào hệ thống (mới nhất trước)
+        const newDateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const newDateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return newDateB - newDateA;
+      }
     }
   });
 
@@ -194,8 +210,9 @@ const LibraryHomePage = () => {
   const featuredBook = currentBooks.find((library: Library) => library.isFeaturedBook) || currentBooks[0];
   const regularBooks = currentBooks.filter((library: Library) => library._id !== featuredBook?._id);
 
-  // Tạo danh sách categories từ dữ liệu
+  // Tạo danh sách categories và series từ dữ liệu
   const categories = getUniqueCategories(books);
+  const seriesList = getUniqueSeries(books);
 
   return (
     <div className="min-h-screen bg-white">
@@ -257,6 +274,48 @@ const LibraryHomePage = () => {
                         </label>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+
+            {/* Chủ đề */}
+              <div className="bg-white rounded-lg p-6">
+                <h3 
+                  className="font-bold text-lg text-[#002855] mb-4 flex items-center justify-between cursor-pointer"
+                  onClick={() => setIsSeriesOpen(!isSeriesOpen)}
+                >
+                  Chủ đề
+                  <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isSeriesOpen ? 'rotate-0' : '-rotate-90'}`} />
+                </h3>
+                {isSeriesOpen && (
+                  <div className="space-y-3">
+                    {seriesList.length > 0 ? (
+                      seriesList.map((series: string) => (
+                        <div key={series} className="flex items-center space-x-3">
+                          <Checkbox
+                            id={`series-${series}`}
+                            checked={selectedSeries.includes(series)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedSeries([...selectedSeries, series]);
+                              } else {
+                                setSelectedSeries(selectedSeries.filter(s => s !== series));
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`series-${series}`}
+                            className={`text-sm cursor-pointer ${
+                              selectedSeries.includes(series) ? 'font-medium text-[#002855]' : 'text-gray-700'
+                            }`}
+                          >
+                            {series}
+                          </label>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">Chưa có chủ đề nào</p>
+                    )}
                   </div>
                 )}
               </div>

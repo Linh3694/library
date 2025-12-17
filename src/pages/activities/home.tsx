@@ -11,6 +11,7 @@ import {
 } from '../../components/ui/breadcrumb';
 import { Pagination } from '../../components/ui/pagination';
 import { libraryAPI, type LibraryActivity, type ActivitiesApiResponse } from '../../lib/api';
+import { getImageUrl } from '../../lib/utils';
 
 // Modal state interface
 interface ModalState {
@@ -144,7 +145,7 @@ const ImageModal = ({ modalState, setModalState }: {
         {/* Image Container */}
         <div className="flex items-center justify-center max-w-full max-h-full mx-20">
           <img
-            src={currentImage.url}
+            src={getImageUrl(currentImage.url) || currentImage.url}
             alt={currentImage.caption || modalState.currentActivity.title}
             className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}
@@ -313,7 +314,7 @@ const ActivitiesHomePage = () => {
                                         onClick={() => handleImageClick(activity, currentGlobalIndex)}
                                       >
                                         <img
-                                          src={image.url}
+                                          src={getImageUrl(image.url) || image.url}
                                           alt={image.caption || `${activity.title} ${index + 1}`}
                                           className="w-full h-full object-cover"
                                         />
@@ -356,7 +357,7 @@ const ActivitiesHomePage = () => {
                                               onClick={() => handleImageClick(activity, currentGlobalIndex)}
                                             >
                                               <img
-                                                src={image.url}
+                                                src={getImageUrl(image.url) || image.url}
                                                 alt={image.caption || `${day.title} - Ảnh ${index + 1}`}
                                                 className="w-full h-full object-cover transition-all duration-300 group-hover:brightness-110"
                                                 loading="lazy"

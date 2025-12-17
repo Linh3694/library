@@ -23,7 +23,7 @@ export function createSlug(title: string): string {
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 }
 
-// Helper function để xử lý đường dẫn ảnh
+// Helper function để xử lý đường dẫn ảnh từ Frappe
 export const getImageUrl = (imagePath: string | undefined | null): string | undefined => {
   if (!imagePath || imagePath.trim() === '') {
     return undefined;
@@ -36,13 +36,18 @@ export const getImageUrl = (imagePath: string | undefined | null): string | unde
     return cleanPath;
   }
   
-  // Nếu bắt đầu với '/', đây là static asset từ public folder
+  // Nếu bắt đầu với '/', đây có thể là:
+  // 1. Static asset từ public folder (local)
+  // 2. File path từ Frappe (cần thêm base URL)
   if (cleanPath.startsWith('/')) {
-    return cleanPath;
+    // Nếu là file từ public folder local (không có /files/)
+    if (!cleanPath.startsWith('/files/') && !cleanPath.startsWith('/private/')) {
+      return cleanPath;
+    }
   }
   
-  // Ngược lại, đây là file từ server uploads, thêm BASE_URL
-  const BASE_URL = 'https://api-dev.wellspring.edu.vn';
+  // Ngược lại, đây là file từ Frappe server, thêm BASE_URL
+  const BASE_URL = import.meta.env.VITE_FRAPPE_URL || 'https://admin.sis.wellspring.edu.vn';
   
   // Đảm bảo không có double slash
   const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;

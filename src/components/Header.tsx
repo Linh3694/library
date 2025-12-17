@@ -16,6 +16,7 @@ const Header: React.FC<HeaderProps> = ({
   const menuItems = [
     { label: 'Trang chủ', href: '/' },
     { label: 'Thư viện sách', href: '/library' },
+    { label: 'Giới thiệu sách', href: '/book-introductions' },
     { label: 'Hoạt động', href: '/activities' },
     // { label: 'Mượn - Trả sách', href: '/borrow' },
     // { label: 'Tìm kiếm sách', href: '/search' },
