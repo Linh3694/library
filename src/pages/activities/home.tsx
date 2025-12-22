@@ -336,7 +336,7 @@ const ActivitiesHomePage = () => {
                               // Chỉ hiển thị days có images
                               .filter(day => day.images && day.images.length > 0)
                               .map((day) => (
-                                <div key={day._id || day.dayNumber} className="space-y-4">
+                                <div key={day.id || day.day_number} className="space-y-4">
                                   {/* Day Header với ngày, tiêu đề và ảnh song song */}
                                   <div className="flex gap-6 items-start">
                                     <div className="w-24 flex-shrink-0">

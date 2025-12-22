@@ -1,48 +1,15 @@
 // Import new service
-import { publicLibraryService, type PublicLibraryTitle } from '../services/publicLibraryService';
+import { 
+  publicLibraryService, 
+  type PublicLibraryTitle,
+  type PublicLibraryEvent,
+  type ActivitiesApiResponse as ServiceActivitiesApiResponse 
+} from '../services/publicLibraryService';
 
 // Re-export types from service
 export type Library = PublicLibraryTitle;
-
-// Types cho Activities
-export interface ActivityDay {
-  _id?: string;
-  dayNumber: number;
-  date: string;
-  title: string;
-  description: string;
-  images: Array<{
-    _id?: string;
-    url: string;
-    caption?: string;
-    uploadedAt?: string;
-  }>;
-}
-
-export interface LibraryActivity {
-  _id: string;
-  title: string;
-  description?: string;
-  date: string;
-  days: ActivityDay[];
-  images: Array<{
-    _id?: string;
-    url: string;
-    caption?: string;
-    uploadedAt?: string;
-  }>;
-  isPublished: boolean;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ActivitiesApiResponse {
-  activities: LibraryActivity[];
-  totalPages: number;
-  currentPage: number;
-  total: number;
-}
+export type LibraryActivity = PublicLibraryEvent;
+export type ActivitiesApiResponse = ServiceActivitiesApiResponse;
 
 // API functions - Using new Frappe backend
 export const libraryAPI = {

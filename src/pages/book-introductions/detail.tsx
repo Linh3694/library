@@ -145,18 +145,18 @@ const BookIntroductionDetailPage = () => {
   const relatedIntros = allRelatedIntros.slice(startIndex, endIndex);
 
   // Format date
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateString;
-    }
-  };
+  // const formatDate = (dateString: string) => {
+  //   try {
+  //     const date = new Date(dateString);
+  //     return date.toLocaleDateString('vi-VN', {
+  //       year: 'numeric',
+  //       month: 'long',
+  //       day: 'numeric',
+  //     });
+  //   } catch {
+  //     return dateString;
+  //   }
+  // };
 
   if (loading) {
     return (

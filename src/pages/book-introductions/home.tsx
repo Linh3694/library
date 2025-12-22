@@ -11,8 +11,8 @@ import {
   BreadcrumbPage,
 } from '../../components/ui/breadcrumb';
 import { Pagination } from '../../components/ui/pagination';
-import { publicLibraryService, type PublicBookIntroduction, type BookIntroductionsApiResponse } from '../../services/publicLibraryService';
-import { type StandardApiResponse } from '../../lib/api';
+import { publicLibraryService, type PublicBookIntroduction } from '../../services/publicLibraryService';
+// import { type StandardApiResponse } from '../../lib/api';
 import { getImageUrl } from '../../lib/utils';
 
 const BookIntroductionsHomePage = () => {
@@ -65,77 +65,77 @@ const BookIntroductionsHomePage = () => {
   }, [currentPage]);
 
   // Format date
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('vi-VN');
-    } catch {
-      return dateString;
-    }
-  };
+  // const formatDate = (dateString: string) => {
+  //   try {
+  //     const date = new Date(dateString);
+  //     return date.toLocaleDateString('vi-VN');
+  //   } catch {
+  //     return dateString;
+  //   }
+  // };
 
   // Intro Card Component
-  const IntroCard = ({ intro, featured = false }: { intro: PublicBookIntroduction; featured?: boolean }) => (
-    <Link
-      to={`/book-introductions/${intro.slug}`}
-      className={`group block bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 ${
-        featured ? 'h-full' : ''
-      }`}
-    >
-      {/* Book Cover */}
-      <div className={`relative overflow-hidden ${featured ? 'h-64' : 'h-48'}`}>
-        {intro.relatedBook?.coverImage ? (
-          <img
-            src={getImageUrl(intro.relatedBook.coverImage) || intro.relatedBook.coverImage}
-            alt={intro.relatedBook.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <svg className="w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-        )}
-        {/* Featured Badge */}
-        {featured && (
-          <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-            Nổi bật
-          </div>
-        )}
-      </div>
+  // const IntroCard = ({ intro, featured = false }: { intro: PublicBookIntroduction; featured?: boolean }) => (
+  //   <Link
+  //     to={`/book-introductions/${intro.slug}`}
+  //     className={`group block bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 ${
+  //       featured ? 'h-full' : ''
+  //     }`}
+  //   >
+  //     {/* Book Cover */}
+  //     <div className={`relative overflow-hidden ${featured ? 'h-64' : 'h-48'}`}>
+  //       {intro.relatedBook?.cover_image ? (
+  //         <img
+  //           src={getImageUrl(intro.relatedBook.cover_image) || intro.relatedBook.cover_image}
+  //           alt={intro.relatedBook.title}
+  //           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+  //         />
+  //       ) : (
+  //         <div className="w-full h-full flex items-center justify-center">
+  //           <svg className="w-16 h-16 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+  //           </svg>
+  //         </div>
+  //       )}
+  //       {/* Featured Badge */}
+  //       {featured && (
+  //         <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+  //           Nổi bật
+  //         </div>
+  //       )}
+  //     </div>
 
-      {/* Content */}
-      <div className="p-5">
-        <h3 className={`font-bold text-[#002855] mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors ${
-          featured ? 'text-xl' : 'text-lg'
-        }`}>
-          {intro.title}
-        </h3>
+  //     {/* Content */}
+  //     <div className="p-5">
+  //       <h3 className={`font-bold text-[#002855] mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors ${
+  //         featured ? 'text-xl' : 'text-lg'
+  //       }`}>
+  //         {intro.title}
+  //       </h3>
         
-        {/* Related Book Info */}
-        {intro.relatedBook && (
-          <div className="mb-3">
-            <p className="text-sm text-gray-600 font-medium">{intro.relatedBook.title}</p>
-            {intro.relatedBook.authors && intro.relatedBook.authors.length > 0 && (
-              <p className="text-xs text-gray-500">
-                {intro.relatedBook.authors.join(', ')}
-              </p>
-            )}
-          </div>
-        )}
+  //       {/* Related Book Info */}
+  //       {intro.relatedBook && (
+  //         <div className="mb-3">
+  //           <p className="text-sm text-gray-600 font-medium">{intro.relatedBook.title}</p>
+  //           {intro.relatedBook.authors && intro.relatedBook.authors.length > 0 && (
+  //             <p className="text-xs text-gray-500">
+  //               {intro.relatedBook.authors.join(', ')}
+  //             </p>
+  //           )}
+  //         </div>
+  //       )}
 
-        <p className={`text-gray-600 mb-3 ${featured ? 'line-clamp-3' : 'line-clamp-2'}`}>
-          {intro.description}
-        </p>
+  //       <p className={`text-gray-600 mb-3 ${featured ? 'line-clamp-3' : 'line-clamp-2'}`}>
+  //         {intro.description}
+  //       </p>
 
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>{formatDate(intro.modifiedAt)}</span>
-          <span className="text-blue-600 font-medium group-hover:underline">Đọc thêm →</span>
-        </div>
-      </div>
-    </Link>
-  );
+  //       <div className="flex items-center justify-between text-xs text-gray-500">
+  //         <span>{formatDate(intro.modifiedAt)}</span>
+  //         <span className="text-blue-600 font-medium group-hover:underline">Đọc thêm →</span>
+  //       </div>
+  //     </div>
+  //   </Link>
+  // );
 
   return (
     <div className="min-h-screen ">

@@ -9,6 +9,7 @@ export interface PublicLibraryTitle {
   libraryCode: string;
   title: string;
   libraryTitle?: string;
+  bookTitle?: string;
   authors: string[];
   category: string;
   coverImage: string;
@@ -33,6 +34,7 @@ export interface PublicLibraryTitle {
   publishYear?: number;
   borrowCount?: number;
   rating?: number;
+  totalBooks?: number;
   createdAt?: string;
   modifiedAt?: string;
 }
@@ -63,6 +65,7 @@ export interface PublicLibraryEvent {
     uploaded_at?: string;
   }>;
   isPublished: boolean;
+  createdBy?: string;
   createdAt: string;
   updatedAt: string;
 }
