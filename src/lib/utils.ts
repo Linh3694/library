@@ -47,7 +47,7 @@ export const getImageUrl = (imagePath: string | undefined | null): string | unde
   }
   
   // Ngược lại, đây là file từ Frappe server, thêm BASE_URL
-  const BASE_URL = import.meta.env.VITE_FRAPPE_URL || 'https://admin.sis.wellspring.edu.vn';
+  const BASE_URL = import.meta.env.VITE_FRAPPE_URL || 'https://prod.sis.wellspring.edu.vn';
   
   // Đảm bảo không có double slash
   const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
