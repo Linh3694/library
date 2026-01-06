@@ -13,10 +13,10 @@ export type ActivitiesApiResponse = ServiceActivitiesApiResponse;
 
 // API functions - Using new Frappe backend
 export const libraryAPI = {
-  // Lấy tất cả libraries
+  // Lấy tất cả libraries (limit = 0 để lấy toàn bộ)
   getAllLibraries: async (): Promise<Library[]> => {
     try {
-      const response = await publicLibraryService.getAllTitles(100, 1);
+      const response = await publicLibraryService.getAllTitles(0, 1);
       if (!response.success || !response.data) {
         throw new Error('Failed to fetch libraries');
       }
@@ -27,10 +27,10 @@ export const libraryAPI = {
     }
   },
 
-  // Lấy tất cả sách (giống getAllLibraries cho trang này)
+  // Lấy tất cả sách (limit = 0 để lấy toàn bộ)
   getAllBooks: async (): Promise<Library[]> => {
     try {
-      const response = await publicLibraryService.getAllTitles(100, 1);
+      const response = await publicLibraryService.getAllTitles(0, 1);
       if (!response.success || !response.data) {
         throw new Error('Failed to fetch books');
       }

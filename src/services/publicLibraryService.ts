@@ -122,6 +122,8 @@ export interface BookIntroductionsApiResponse {
 class PublicLibraryService {
   /**
    * Lấy tất cả đầu sách
+   * @param limit - Số lượng sách cần lấy. Nếu limit = 0, sẽ lấy toàn bộ sách
+   * @param page - Trang hiện tại (dùng khi có limit)
    */
   async getAllTitles(limit: number = 20, page: number = 1): Promise<StandardApiResponse<PublicLibraryTitle[]>> {
     return apiService.get<PublicLibraryTitle[]>(`${BASE}.list_public_titles`, { limit, page });

@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 
 // Frappe API configuration - Sử dụng environment variable hoặc fallback
-const FRAPPE_BASE_URL = import.meta.env.VITE_FRAPPE_URL || 'https://admin.sis.wellspring.edu.vn';
+const FRAPPE_BASE_URL = import.meta.env.VITE_FRAPPE_URL || 'https://prod.sis.wellspring.edu.vn';
 
 // Standard API response type
 export interface StandardApiResponse<T> {
