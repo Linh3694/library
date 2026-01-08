@@ -15,6 +15,7 @@ import {
 } from '../../components/ui/breadcrumb';
 import { Pagination } from '../../components/ui/pagination';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Interface cho book detail từ API
 interface BookDetail {
@@ -364,6 +365,7 @@ const BookDetailPage = () => {
               {bookDetail?.description?.content && (
                 <div className="prose prose-lg max-w-none text-justify border-b border-[#DDDDDD] pb-10">
                   <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
                     components={{
                       h1: (props) => <h1 className="text-2xl font-bold text-[#002855] mb-4 mt-6" {...props} />,
                       h2: (props) => <h2 className="text-xl font-bold text-[#002855] mb-3 mt-5" {...props} />,
@@ -374,8 +376,9 @@ const BookDetailPage = () => {
                           const videoEmbed = renderVideoEmbed(children.trim());
                           if (videoEmbed) return videoEmbed;
                         }
-                        return <p className="text-[#757575] leading-relaxed mb-4 text-sm font-semibold" {...props}>{children}</p>;
+                        return <p className="text-[#757575] leading-relaxed mb-4 text-sm font-semibold whitespace-pre-line" {...props}>{children}</p>;
                       },
+                      br: () => <br />,
                       ul: (props) => <ul className="list-disc list-inside mb-4 space-y-2" {...props} />,
                       ol: (props) => <ol className="list-decimal list-inside mb-4 space-y-2" {...props} />,
                       li: (props) => <li className="text-[#757575] text-sm" {...props} />,
@@ -395,6 +398,9 @@ const BookDetailPage = () => {
                           {...props} 
                         />
                       ),
+                      strong: (props) => <strong className="font-bold text-[#002855]" {...props} />,
+                      em: (props) => <em className="italic" {...props} />,
+                      code: (props) => <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono" {...props} />,
                     }}
                   >
                     {bookDetail.description.content}
