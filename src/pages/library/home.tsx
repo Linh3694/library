@@ -25,25 +25,7 @@ import { Checkbox } from '../../components/ui/checkbox';
 
 import { Search, ChevronDown, Loader2 } from 'lucide-react';
 import { Pagination } from '../../components/ui/pagination';
-import { libraryAPI, type Library } from '../../lib/api';
-
-// Lấy danh sách phân loại tài liệu duy nhất (đồng bộ với lookup document_type trong admin)
-const getUniqueDocumentTypes = (books: Library[]) => {
-  const types = new Set<string>();
-  books.forEach(book => {
-    if (book.documentType) types.add(book.documentType);
-  });
-  return Array.from(types);
-};
-
-// Lấy danh sách chủ đề duy nhất
-const getUniqueSeries = (books: Library[]) => {
-  const series = new Set<string>();
-  books.forEach(book => {
-    if (book.seriesName) series.add(book.seriesName);
-  });
-  return Array.from(series);
-};
+import { libraryAPI, type Library, type LookupItem } from '../../lib/api';
 
 
 
@@ -112,10 +94,14 @@ const LibraryHomePage = () => {
   const [isSeriesOpen, setIsSeriesOpen] = useState(true);
   const [isGenreOpen, setIsGenreOpen] = useState(true);
   
-  // Thêm state cho API data
+  // State cho API data
   const [books, setBooks] = useState<Library[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // State cho lookups từ admin (nguồn chính thống)
+  const [documentTypes, setDocumentTypes] = useState<string[]>([]);
+  const [seriesList, setSeriesList] = useState<string[]>([]);
 
   const booksPerPage = 20;
   const sortOptions = ['Mới nhất', 'Cũ nhất', 'A-Z', 'Z-A'];
@@ -125,14 +111,32 @@ const LibraryHomePage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Load dữ liệu từ API
+  // Load sách và lookups song song
   useEffect(() => {
-    const fetchBooks = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await libraryAPI.getAllLibraries();
-        setBooks(data);
+
+        const [booksData, lookupsData] = await Promise.all([
+          libraryAPI.getAllLibraries(),
+          libraryAPI.getLookups().catch(() => [] as LookupItem[]),
+        ]);
+
+        setBooks(booksData);
+
+        // Phân loại lookups theo type
+        const docTypes = lookupsData
+          .filter((l) => l.type === 'document_type')
+          .map((l) => l.name)
+          .filter(Boolean);
+        const series = lookupsData
+          .filter((l) => l.type === 'series')
+          .map((l) => l.name)
+          .filter(Boolean);
+
+        setDocumentTypes(docTypes);
+        setSeriesList(series);
       } catch (err) {
         console.error('Error fetching libraries:', err);
         setError('Không thể tải dữ liệu thư viện. Vui lòng thử lại.');
@@ -141,7 +145,7 @@ const LibraryHomePage = () => {
       }
     };
 
-    fetchBooks();
+    fetchData();
   }, []);
 
   const handleSearch = () => {
@@ -207,9 +211,6 @@ const LibraryHomePage = () => {
 
   const featuredBook = currentBooks.find((library: Library) => library.isFeaturedBook) || currentBooks[0];
   const regularBooks = currentBooks.filter((library: Library) => library._id !== featuredBook?._id);
-
-  const documentTypes = getUniqueDocumentTypes(books);
-  const seriesList = getUniqueSeries(books);
 
   return (
     <div className="min-h-screen bg-white">

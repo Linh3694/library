@@ -3,16 +3,32 @@ import {
   publicLibraryService, 
   type PublicLibraryTitle,
   type PublicLibraryEvent,
+  type PublicLookupItem,
   type ActivitiesApiResponse as ServiceActivitiesApiResponse 
 } from '../services/publicLibraryService';
 
 // Re-export types from service
 export type Library = PublicLibraryTitle;
 export type LibraryActivity = PublicLibraryEvent;
+export type LookupItem = PublicLookupItem;
 export type ActivitiesApiResponse = ServiceActivitiesApiResponse;
 
 // API functions - Using new Frappe backend
 export const libraryAPI = {
+  // Lấy danh mục public (document_type, series)
+  getLookups: async (type: string = ""): Promise<LookupItem[]> => {
+    try {
+      const response = await publicLibraryService.getPublicLookups(type);
+      if (!response.success || !response.data) {
+        throw new Error('Failed to fetch lookups');
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching lookups:', error);
+      throw error;
+    }
+  },
+
   // Lấy tất cả libraries (limit = 0 để lấy toàn bộ)
   getAllLibraries: async (): Promise<Library[]> => {
     try {

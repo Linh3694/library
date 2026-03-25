@@ -119,7 +119,22 @@ export interface BookIntroductionsApiResponse {
   total: number;
 }
 
+export interface PublicLookupItem {
+  id: string;
+  code: string;
+  type: string;
+  name: string;
+}
+
 class PublicLibraryService {
+  /**
+   * Lấy danh mục public (document_type, series)
+   * @param type - "document_type" | "series" | "" (lấy cả 2)
+   */
+  async getPublicLookups(type: string = ""): Promise<StandardApiResponse<PublicLookupItem[]>> {
+    return apiService.get<PublicLookupItem[]>(`${BASE}.list_public_lookups`, { type });
+  }
+
   /**
    * Lấy tất cả đầu sách
    * @param limit - Số lượng sách cần lấy. Nếu limit = 0, sẽ lấy toàn bộ sách
