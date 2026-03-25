@@ -27,14 +27,13 @@ import { Search, ChevronDown, Loader2 } from 'lucide-react';
 import { Pagination } from '../../components/ui/pagination';
 import { libraryAPI, type Library } from '../../lib/api';
 
-// Tạo categories và genres từ dữ liệu thực
-const getUniqueCategories = (books: Library[]) => {
-  const categories = new Set<string>();
+// Lấy danh sách phân loại tài liệu duy nhất (đồng bộ với lookup document_type trong admin)
+const getUniqueDocumentTypes = (books: Library[]) => {
+  const types = new Set<string>();
   books.forEach(book => {
-    if (book.category) categories.add(book.category);
-    if (book.documentType) categories.add(book.documentType);
+    if (book.documentType) types.add(book.documentType);
   });
-  return ['Tất cả', ...Array.from(categories)];
+  return Array.from(types);
 };
 
 // Lấy danh sách chủ đề duy nhất
@@ -162,7 +161,6 @@ const LibraryHomePage = () => {
     
     const matchesCategory = selectedCategories.length === 0 || 
                            selectedCategories.some(cat => 
-                             library.category?.includes(cat) || 
                              library.documentType?.includes(cat)
                            );
     
@@ -210,8 +208,7 @@ const LibraryHomePage = () => {
   const featuredBook = currentBooks.find((library: Library) => library.isFeaturedBook) || currentBooks[0];
   const regularBooks = currentBooks.filter((library: Library) => library._id !== featuredBook?._id);
 
-  // Tạo danh sách categories và series từ dữ liệu
-  const categories = getUniqueCategories(books);
+  const documentTypes = getUniqueDocumentTypes(books);
   const seriesList = getUniqueSeries(books);
 
   return (
@@ -240,40 +237,44 @@ const LibraryHomePage = () => {
         <div className="flex gap-8">
           {/* Sidebar */}
           <div className="w-64 flex-shrink-0 pt-[7%]">
-                          {/* Thể loại */}
+                          {/* Phân loại tài liệu (đồng bộ lookup document_type từ admin) */}
               <div className={`bg-white rounded-lg p-6 `}>
                 <h3 
                   className="font-bold text-lg text-[#002855] mb-4 flex items-center justify-between cursor-pointer"
                   onClick={() => setIsCategoryOpen(!isCategoryOpen)}
                 >
-                  Thể loại
+                  Phân loại tài liệu
                   <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isCategoryOpen ? 'rotate-0' : '-rotate-90'}`} />
                 </h3>
                 {isCategoryOpen && (
                   <div className="space-y-3">
-                    {categories.filter(cat => cat !== 'Tất cả').map((category: string) => (
-                      <div key={category} className="flex items-center space-x-3">
-                        <Checkbox
-                          id={`category-${category}`}
-                          checked={selectedCategories.includes(category)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedCategories([...selectedCategories, category]);
-                            } else {
-                              setSelectedCategories(selectedCategories.filter(cat => cat !== category));
-                            }
-                          }}
-                        />
-                        <label
-                          htmlFor={`category-${category}`}
-                          className={`text-sm cursor-pointer ${
-                            selectedCategories.includes(category) ? 'font-medium text-[#002855]' : 'text-gray-700'
-                          }`}
-                        >
-                          {category}
-                        </label>
-                      </div>
-                    ))}
+                    {documentTypes.length > 0 ? (
+                      documentTypes.map((docType: string) => (
+                        <div key={docType} className="flex items-center space-x-3">
+                          <Checkbox
+                            id={`category-${docType}`}
+                            checked={selectedCategories.includes(docType)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedCategories([...selectedCategories, docType]);
+                              } else {
+                                setSelectedCategories(selectedCategories.filter(cat => cat !== docType));
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`category-${docType}`}
+                            className={`text-sm cursor-pointer ${
+                              selectedCategories.includes(docType) ? 'font-medium text-[#002855]' : 'text-gray-700'
+                            }`}
+                          >
+                            {docType}
+                          </label>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">Chưa có phân loại nào</p>
+                    )}
                   </div>
                 )}
               </div>
