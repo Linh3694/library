@@ -1,23 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
 import { cn, createSlug, getImageUrl } from '../../lib/utils';
-import { libraryAPI, type Library } from '../../lib/api';
-
-interface FeaturedLibrary {
-  _id?: string;
-  libraryCode?: string;
-  title: string; // Library title
-  authors?: string[];
-  category?: string;
-  coverImage?: string;
-  isNewBook?: boolean;
-  isFeaturedBook?: boolean;
-  isAudioBook?: boolean;
-  // Thông tin bổ sung từ books trong library
-  totalBooks?: number;
-  averageRating?: number;
-  totalBorrowCount?: number;
-}
+import { libraryAPI, type BookIntroduction } from '../../lib/api';
 
 interface BookFeaturedProps {
   className?: string;
@@ -25,349 +10,237 @@ interface BookFeaturedProps {
 
 const BookFeatured: React.FC<BookFeaturedProps> = ({ className }) => {
   const navigate = useNavigate();
-  const [featuredLibraries, setFeaturedLibraries] = useState<FeaturedLibrary[]>([]);
+  const [introductions, setIntroductions] = useState<BookIntroduction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch featured libraries from backend
+  // Fetch book introductions from backend
   useEffect(() => {
-    const fetchFeaturedLibraries = async () => {
+    const fetchIntroductions = async () => {
       try {
-        const books = await libraryAPI.getFeaturedBooks(4);
-        
-        // Group books theo libraryId để tạo unique libraries
-        const libraryMap = new Map<string, FeaturedLibrary>();
-        
-        books.forEach((book: Library) => {
-          const libraryId = book.libraryId || book._id;
-          if (!libraryMap.has(libraryId)) {
-            libraryMap.set(libraryId, {
-              _id: libraryId,
-              libraryCode: book.libraryCode,
-              title: book.libraryTitle || book.bookTitle || book.title || 'Chưa có tên', // Fallback chain
-              authors: book.authors,
-              category: book.category,
-              coverImage: book.coverImage,
-              isNewBook: book.isNewBook,
-              isFeaturedBook: book.isFeaturedBook || false,
-              isAudioBook: book.isAudioBook,
-              totalBooks: 1,
-              averageRating: book.rating || 0,
-              totalBorrowCount: book.borrowCount || 0
-            });
-          } else {
-            // Update existing library with more book data
-            const existingLibrary = libraryMap.get(libraryId)!;
-            existingLibrary.totalBooks = (existingLibrary.totalBooks || 0) + 1;
-            existingLibrary.averageRating = ((existingLibrary.averageRating || 0) + (book.rating || 0)) / 2;
-            existingLibrary.totalBorrowCount = (existingLibrary.totalBorrowCount || 0) + (book.borrowCount || 0);
-          }
-        });
-        
-        // Convert map to array và chỉ lấy 4 libraries đầu tiên
-        const uniqueLibraries = Array.from(libraryMap.values()).slice(0, 4);
-        setFeaturedLibraries(uniqueLibraries);
-        
+        // Fetch latest 3 introductions (not just featured)
+        const response = await libraryAPI.getBookIntroductions(1, 3, false);
+        setIntroductions(response.introductions || []);
       } catch (error) {
-        console.error('Error fetching featured libraries:', error);
-        // Set empty array so UI doesn't break
-        setFeaturedLibraries([]);
+        console.error('Error fetching book introductions:', error);
+        setIntroductions([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFeaturedLibraries();
+    fetchIntroductions();
   }, []);
 
   return (
     <section className={cn(
-      "w-full flex not-odd:relative",
+      "w-full bg-background relative max-w-[1920px] mx-auto py-12 lg:py-32",
       className
     )}>
-      {/* Main Content Container */}
-      <div className="flex items-start w-full pt-20 mx-20">
-        {/* Left Section - 1 Library with Circle Background */}
-        <div className="flex-1 flex justify-center items-start py-10">
-          {loading ? (
-            // Loading skeleton
-            <div className="relative">
-              <div className="w-96 h-96 rounded-full bg-gray-200 flex items-center justify-center animate-pulse">
-                <div className="w-[200px] h-[270px] bg-gray-300 rounded-lg"></div>
-              </div>
-              <div className="mt-8 space-y-3">
-                <div className="h-6 bg-gray-300 rounded w-80 mx-auto"></div>
-                <div className="h-4 bg-gray-300 rounded w-48 mx-auto"></div>
-                <div className="h-4 bg-gray-300 rounded w-64 mx-auto"></div>
-                <div className="h-3 bg-gray-300 rounded w-40 mx-auto"></div>
-              </div>
+      <div className="max-w-[1600px] mx-auto w-full px-4 md:px-8 2xl:px-0 flex flex-col">
+        {/* Header */}
+        <div className="flex flex-col items-start gap-4 mb-8 lg:mb-12">
+          <div className="w-full flex items-start gap-4">
+            <div className="flex items-center gap-4 transition-all duration-300">
+              <div className="w-6 h-6 bg-amber rounded-full"></div>
+              <div className="w-6 h-6 bg-lime rounded-full"></div>
             </div>
-          ) : featuredLibraries.length > 0 ? (
-            // First library with special layout
-            <div className="flex flex-col items-start mt-[80%] ml-[10%] group hover:scale-105 transition-transform duration-300">
-              {/* Circle Container */}
-              <Link 
-                to={`/library/book/${createSlug(featuredLibraries[0].title)}`}
-                className="relative w-96 h-64 rounded-full bg-gray-100 flex items-center justify-center mb-8">
-                {/* Library Cover */}
-                <div className="relative w-[150px] h-[200px] flex items-center justify-center">
-                  {featuredLibraries[0].coverImage ? (
-                    <img 
-                      src={getImageUrl(featuredLibraries[0].coverImage)} 
-                      alt={featuredLibraries[0].title}
-                      className="w-full h-full object-cover rounded-2xl shadow-2xl border-2 border-white"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center rounded-lg shadow-2xl">
-                      <div className="text-center p-4">
-                        <div className="w-16 h-20 bg-white rounded shadow-sm mx-auto mb-3"></div>
-                        <div className="text-sm text-blue-800 font-medium uppercase tracking-wide leading-tight">
-                          {featuredLibraries[0].title}
+          </div>
+          <div className="w-full flex items-center justify-between gap-4">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-oxford leading-tight lg:leading-relaxed transition-all duration-300">GIỚI THIỆU SÁCH</h2>
+            <div className="ml-auto">
+              <Link
+                to="/library?filter=featured"
+                className="text-red-orange font-extrabold hover:text-orange-600 transition-colors text-sm md:text-base"
+              >
+                XEM THÊM
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Grid Layout Section */}
+        <div className="w-full">
+          <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6 lg:gap-10">
+            {loading ? (
+              // Loading skeleton matching the grid layout
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="flex flex-col items-center animate-pulse">
+                  <div className="w-full aspect-[4/5] bg-gray-100 rounded-4xl"></div>
+                </div>
+              ))
+            ) : introductions.length > 0 ? (
+              <>
+                {/* Box 1: Book Intro 1 */}
+                {introductions[0] && (
+                  <div className="flex flex-col items-center group transition-all pt-0 md:pt-8 lg:pt-[240px]">
+                    <Link
+                      to={`/book-introductions/${introductions[0].slug}`}
+                      className="w-full"
+                    >
+                      <div className="aspect-[380/260] w-full bg-semi-white rounded-[130px] relative overflow-hidden group/box">
+                        {/* Image Layer */}
+                        <div className="absolute inset-0 flex items-center justify-center transition-all duration-500 ease-in-out group-hover/box:opacity-0 group-hover/box:-translate-y-4 z-10">
+                          {introductions[0].relatedBook?.cover_image ? (
+                            <img
+                              src={getImageUrl(introductions[0].relatedBook.cover_image)}
+                              alt={introductions[0].title}
+                              className="w-[42%] h-[84%] object-cover rounded-[2px] border border-light-gray"
+                            />
+                          ) : (
+                            <div className="w-[42%] h-[84%] bg-gray-200 rounded-[2px] flex items-center justify-center text-[12px] text-gray-500 p-2 text-center">
+                              {introductions[0].title}
+                            </div>
+                          )}
                         </div>
-                        {featuredLibraries[0].totalBooks && (
-                          <div className="text-xs mt-1 opacity-90">
-                            {featuredLibraries[0].totalBooks} quyển
-                          </div>
-                        )}
+
+                        {/* Hover Content Layer */}
+                        <div className="absolute inset-0 px-8 py-10 flex items-center justify-center opacity-0 translate-y-12 group-hover/box:opacity-100 group-hover/box:translate-y-0 transition-all duration-500 ease-in-out z-20">
+                          <p className="text-sm text-dark-gray leading-relaxed line-clamp-[6] text-center w-full">
+                            {introductions[0].content || introductions[0].description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-8 px-[10%]">
+                        <h3 className="text-base font-bold text-oxford uppercase line-clamp-2 leading-tight mb-2">
+                          {introductions[0].title}
+                        </h3>
+                        <p className="text-base text-dark-gray font-semibold mb-10 line-clamp-1">
+                          {introductions[0].relatedBook?.authors?.join(", ") || "Chưa rõ tác giả"}
+                        </p>
+                        <p className="text-base text-dark-gray font-bold italic opacity-80">
+                          {introductions[0].description}
+                        </p>
+                      </div>
+                    </Link>
+                  </div>
+                )}
+
+                {/* Box 2: Discovery Circle */}
+                <div className="flex flex-col items-center pt-8 lg:pt-[110px]">
+                  <div
+                    className="relative w-full aspect-square rounded-full border-[3px] border-red-orange flex items-center justify-center bg-background duration-300 group cursor-pointer hover:bg-red-orange transition-colors"
+                    onClick={() => navigate('/library?filter=featured')}
+                  >
+                    <div className="relative flex items-center justify-center transition-all duration-500 ease-out group-hover:scale-110">
+                      <span className="text-4xl font-black text-red-orange uppercase z-10 transition-all duration-500 group-hover:text-white group-hover:-translate-x-5">
+                        Khám phá
+                      </span>
+                      <div className="absolute top-1/2 -translate-y-1/2 left-full pl-2 opacity-0 -translate-x-10 transition-all duration-500 ease-out flex items-center group-hover:-translate-x-5 group-hover:opacity-100">
+                        <ArrowUpRight className="w-8 h-8 text-white transition-transform duration-500 ease-out" />
                       </div>
                     </div>
-                  )}
-                </div>
-              </Link>
-
-              {/* Library Information */}
-              <div className="text-left ml-[10%] max-w-md">
-                {/* Library Title */}
-                <h3 className="text-lg font-bold uppercase text-[#002855] mb-3 leading-tight">
-                  {featuredLibraries[0].title}
-                </h3>
-                
-                {/* Author */}
-                <p className="text-base text-[#757575] mb-4 font-medium">
-                  {featuredLibraries[0].authors?.join(", ") || "Tác giả đa dạng"}
-                </p>
-                
-                {/* Description */}
-                <p className="text-sm text-[#666666] mb-4 leading-relaxed">
-                  Bộ sưu tập sách nổi bật với {featuredLibraries[0].totalBooks || 1} quyển sách chất lượng cao
-                </p>
-                
-                {/* Publication Info */}
-                <p className="text-sm text-[#999999] italic">
-                  Thư viện nổi bật tháng {new Date().getMonth() + 1}
-                </p>
-              </div>
-            </div>
-          ) : (
-            // No libraries found
-            <div className="w-full text-center py-20">
-              <div className="flex flex-col items-center">
-                <svg className="w-16 h-16 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
-                </svg>
-                <p className="text-gray-500 text-lg mb-2">Chưa có thư viện nổi bật nào</p>
-                <p className="text-gray-400 text-sm">Vui lòng thêm Library với isFeaturedBook: true để hiển thị thư viện nổi bật</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Center Section - Discover Circle */}
-        <div className="flex-1 flex justify-start items-center pt-[15%] hover:scale-105 transition-transform duration-300">
-          <div className="relative">
-            {/* Main Circle */}
-            <div 
-              className="w-80 h-80 lg:w-64 lg:h-64 rounded-full border-4 border-[#F05023] flex items-center justify-center bg-white hover:bg-gray-50 transition-colors duration-300 cursor-pointer group"
-              onClick={() => navigate('/library?filter=featured')}
-            >
-              <div className="text-center">
-                <h3 className="text-4xl lg:text-3xl font-extrabold text-[#F05023]">
-                  KHÁM PHÁ
-                </h3>
-              </div>
-            </div>
-            {/* Arrow Icon - Top Right Corner */}
-            <div className="absolute -top-2 -right-2 w-12 h-12 lg:w-10 lg:h-10 bg-gray-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <svg className="w-6 h-6 lg:w-5 lg:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7V17" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Section - 2 Libraries with Different Heights */}
-        <div className="flex-1 flex justify-start items-start pt-[10%] mr-[5%]">
-          <div className="flex gap-8 items-start">
-            {loading ? (
-              // Loading skeleton
-              <>
-                {/* Short Library - Left */}
-                <div className="flex flex-col items-center text-center animate-pulse">
-                  <div className="relative mb-4 flex items-center justify-center">
-                    {/* Gray Oval Background */}
-                        <div className="absolute bg-gray-200 w-[560px] h-[360px] rounded-full"></div>
-                        {/* Library Placeholder */}
-                       <div className="relative z-10 w-[240px] h-[320px] bg-gray-300 rounded-lg"></div>
-                  </div>
-                  <div className="w-full text-center">
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2 mx-auto mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/3 mx-auto"></div>
+                    <div className="absolute w-[60px] h-[60px] -top-[30px] right-0 bg-semi-white rounded-full text-gray-500 flex items-center justify-center transition-all duration-500 ease-in-out group-hover:opacity-0 group-hover:scale-0 group-hover:translate-x-4 group-hover:-translate-y-4 pointer-events-none">
+                      <ArrowUpRight className="w-6 h-6" />
+                    </div>
                   </div>
                 </div>
-                {/* Tall Library - Right */}
-                <div className="flex flex-col items-center text-center animate-pulse">
-                  <div className="relative mb-4 flex items-center justify-center">
-                        {/* Gray Oval Background */}
-                        <div className="absolute bg-gray-200 w-[400px] h-[640px] rounded-full"></div>
-                        {/* Library Placeholder */}
-                       <div className="relative z-10 w-[320px] h-[480px] bg-gray-300 rounded-lg"></div>
+
+                {/* Box 3: Book Intro 2 */}
+                {introductions[1] && (
+                  <div className="flex flex-col items-center group transition-all">
+                    <Link
+                      to={`/book-introductions/${introductions[1].slug}`}
+                      className="w-full"
+                    >
+                      <div className="aspect-[380/260] w-full bg-semi-white rounded-[130px] relative overflow-hidden group/box">
+                        {/* Image Layer */}
+                        <div className="absolute inset-0 flex items-center justify-center transition-all duration-500 ease-in-out group-hover/box:opacity-0 group-hover/box:-translate-y-4 z-10">
+                          {introductions[1].relatedBook?.cover_image ? (
+                            <img
+                              src={getImageUrl(introductions[1].relatedBook.cover_image)}
+                              alt={introductions[1].title}
+                              className="w-[42%] h-[84%] object-cover rounded-[2px] border border-ligh-gray"
+                            />
+                          ) : (
+                            <div className="w-[42%] h-[84%] bg-gray-200 rounded-[2px] flex items-center justify-center text-[12px] text-gray-500 p-2 text-center">
+                              {introductions[1].title}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Hover Content Layer */}
+                        <div className="absolute inset-0 px-8 py-10 flex items-center justify-center opacity-0 translate-y-12 group-hover/box:opacity-100 group-hover/box:translate-y-0 transition-all duration-500 ease-in-out z-20">
+                          <p className="text-sm text-dark-gray leading-relaxed line-clamp-[6] text-center w-full">
+                            {introductions[1].content || introductions[1].description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-8 px-[10%]">
+                        <h3 className="text-base font-bold text-oxford uppercase line-clamp-2 leading-tight mb-2">
+                          {introductions[1].title}
+                        </h3>
+                        <p className="text-base text-dark-gray font-semibold mb-10 line-clamp-1">
+                          {introductions[1].relatedBook?.authors?.join(", ") || "Chưa rõ tác giả"}
+                        </p>
+                        <p className="text-base text-dark-gray font-bold italic opacity-80">
+                          {introductions[1].description}
+                        </p>
+                      </div>
+                    </Link>
                   </div>
-                  <div className="w-full text-center">
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2 mx-auto mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/3 mx-auto"></div>
+                )}
+
+                {/* Box 4: Book Intro 3 */}
+                {introductions[2] && (
+                  <div className="flex flex-col items-center group transition-all">
+                    <Link
+                      to={`/book-introductions/${introductions[2].slug}`}
+                      className="w-full"
+                    >
+                      <div className="aspect-[380/640] w-full bg-semi-white rounded-[130px] relative overflow-hidden group/box">
+                        {/* Image Layer */}
+                        <div className="absolute inset-0 flex items-center justify-center transition-all duration-500 ease-in-out group-hover/box:opacity-0 group-hover/box:-translate-y-4 z-10">
+                          {introductions[2].relatedBook?.cover_image ? (
+                            <img
+                              src={getImageUrl(introductions[2].relatedBook.cover_image)}
+                              alt={introductions[2].title}
+                              className="w-[73%] h-[59%] object-cover rounded-[2px] border border-light-gray"
+                            />
+                          ) : (
+                            <div className="w-[73%] h-[59%] bg-gray-200 rounded-[2px] flex items-center justify-center text-[12px] text-gray-500 p-4 text-center">
+                              {introductions[2].title}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Hover Content Layer */}
+                        <div className="absolute inset-0 px-8 py-16 flex items-center justify-center opacity-0 translate-y-16 group-hover/box:opacity-100 group-hover/box:translate-y-0 transition-all duration-500 ease-in-out z-20">
+                          <p className="text-sm text-dark-gray leading-relaxed line-clamp-[15] text-center w-full">
+                            {introductions[2].content || introductions[2].description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-8 px-[10%]">
+                        <h3 className="text-base font-bold text-oxford uppercase line-clamp-2 leading-tight mb-2">
+                          {introductions[2].title}
+                        </h3>
+                        <p className="text-base text-dark-gray font-semibold mb-10 line-clamp-1">
+                          {introductions[2].relatedBook?.authors?.join(", ") || "Chưa rõ tác giả"}
+                        </p>
+                        <p className="text-base text-dark-gray font-bold italic opacity-80">
+                          {introductions[2].description}
+                        </p>
+                      </div>
+                    </Link>
                   </div>
-                </div>
+                )}
               </>
             ) : (
-              // Always show exactly 2 libraries with fixed layout
-              <>
-                {/* Short Library - Left - Chỉ hiển thị khi có dữ liệu thật */}
-                {featuredLibraries.length > 1 && (
-                  <div className="flex flex-col mr-10 items-center text-center group hover:scale-105 transition-transform duration-300">
-                    {/* Library Cover Container with Gray Oval Background */}
-                    <Link
-                      to={`/library/book/${createSlug(featuredLibraries[1].title)}`}
-                      className="relative mb-4 flex items-center justify-center">
-                      {/* Gray Oval Background - Horizontal for short library */}
-                      <div className="absolute bg-gray-200 w-[400px] h-[250px] rounded-full"></div>
-                      {/* Library Cover */}
-                      <div className="relative z-10 flex items-center justify-center w-[150px] h-[200px]">
-                        {featuredLibraries[1].coverImage ? (
-                          <img 
-                            src={getImageUrl(featuredLibraries[1].coverImage)} 
-                            alt={featuredLibraries[1].title}
-                            className="w-full h-full object-cover rounded-2xl shadow-xl border-2 border-white"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center rounded-lg shadow-xl">
-                            <div className="text-center p-6">
-                              <div className="w-12 h-20 bg-white rounded shadow-sm mx-auto mb-4"></div>
-                              <div className="text-sm text-blue-800 font-medium uppercase tracking-wide">
-                                {featuredLibraries[1].title}
-                              </div>
-                              {featuredLibraries[1].totalBooks && (
-                                <div className="text-xs mt-1 opacity-90">
-                                  {featuredLibraries[1].totalBooks} quyển
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>                           
-                    </Link>
-
-                    {/* Library Info */}
-                    <div className="w-[350px] text-start mt-12 -ml-10">
-                      <p className="text-lg font-bold uppercase text-[#002855] mb-3 leading-tight">
-                        {featuredLibraries[1].title}
-                      </p>
-                      <p className="text-base text-[#757575] mb-2">
-                        {featuredLibraries[1].authors?.join(", ") || "Tác giả đa dạng"}
-                      </p>
-                      <p className="text-sm text-[#666666] mb-3 leading-relaxed">
-                        Bộ sưu tập {featuredLibraries[1].totalBooks || 1} quyển sách chất lượng cao được lựa chọn kỹ càng
-                      </p>
-                      <p className="text-sm text-[#999999] italic">
-                        Thư viện nổi bật tháng {new Date().getMonth() + 1}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tall Library - Right - Chỉ hiển thị khi có dữ liệu thật */}
-                {featuredLibraries.length > 2 && (
-                  <div className="flex flex-col items-center text-center group hover:scale-105 transition-transform duration-300">
-                    {/* Library Cover Container with Gray Oval Background */}
-                    <Link 
-                      to={`/library/book/${createSlug(featuredLibraries[2].title)}`}
-                      className="relative mb-4 flex items-center justify-center">
-                      {/* Gray Oval Background - Vertical for tall library */}
-                      <div className="absolute bg-gray-200 w-[350px] h-[500px] rounded-[100px] -top-10"></div>
-                      {/* Library Cover */}
-                      <div className="relative z-10 flex items-center justify-center w-[250px] h-[333px] top-10">
-                        {featuredLibraries[2].coverImage ? (
-                          <img 
-                            src={getImageUrl(featuredLibraries[2].coverImage)} 
-                            alt={featuredLibraries[2].title}
-                            className="w-full h-full object-cover rounded-2xl shadow-xl border-2 border-white"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-300 flex items-center justify-center rounded-lg shadow-xl">
-                            <div className="text-center p-8">
-                              <div className="w-20 h-28 bg-white rounded shadow-sm mx-auto mb-4"></div>
-                              <div className="text-sm text-green-800 font-medium uppercase tracking-wide">
-                                {featuredLibraries[2].title}
-                              </div>
-                              {featuredLibraries[2].totalBooks && (
-                                <div className="text-xs mt-1 opacity-90">
-                                  {featuredLibraries[2].totalBooks} quyển
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>                           
-                    </Link>
-
-                    {/* Library Info */}
-                    <div className="w-[350px] text-start mt-32">
-                      <p className="text-lg font-bold uppercase text-[#002855] mb-3 leading-tight">
-                        {featuredLibraries[2].title}
-                      </p>
-                      <p className="text-base text-[#757575] mb-2">
-                        {featuredLibraries[2].authors?.join(", ") || "Tác giả đa dạng"}
-                      </p>
-                      <p className="text-sm text-[#666666] mb-3 leading-relaxed">
-                        Bộ sưu tập {featuredLibraries[2].totalBooks || 1} quyển sách chọn lọc với nội dung phong phú
-                      </p>
-                      <p className="text-sm text-[#999999] italic">
-                        Thư viện nổi bật tháng {new Date().getMonth() + 1}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Thông báo khi không đủ dữ liệu */}
-                {featuredLibraries.length <= 2 && (
-                  <div className="flex items-center justify-center w-full text-center py-10">
-                    <div className="flex flex-col items-center">
-                      <svg className="w-12 h-12 text-gray-400 mb-3" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
-                      </svg>
-                      <p className="text-gray-500 text-sm">Cần thêm thư viện nổi bật để hiển thị đầy đủ</p>
-                      <p className="text-gray-400 text-xs mt-1">Vui lòng tạo thêm Library với isFeaturedBook: true</p>
-                    </div>
-                  </div>
-                )}
-              </>
+              // No introductions found state
+              <div className="col-span-4 text-center py-20">
+                <div className="flex flex-col items-center">
+                  <svg className="w-16 h-16 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3M19 19H5V5H19V19Z" />
+                  </svg>
+                  <p className="text-gray-500 text-lg mb-2">Chưa có bài giới thiệu sách nào</p>
+                </div>
+              </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Section Title */}
-      <div className="absolute top-16 left-40">
-        <div className="flex flex-col items-start gap-4">
-            <div className="flex items-center gap-4">
-          <div className="w-6 h-6 bg-[#FFCE02] rounded-full"></div>
-          <div className="w-6 h-6 bg-[#BED232] rounded-full"></div>
-            </div>
-          <h2 className="text-5xl font-extrabold text-[#002855]">SÁCH NỔI BẬT</h2>
         </div>
       </div>
     </section>
   );
 };
 
-export default BookFeatured; 
+export default BookFeatured;

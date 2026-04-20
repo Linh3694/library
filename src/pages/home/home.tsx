@@ -3,9 +3,9 @@ import { Header, Footer, HeroSection, BookNew, BookFeatured, AudioBooks, Activit
 
 const HomePage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-        <div className="sticky top-0 z-1000">
-      <Header userName="Nguyễn Hải Linh" />
+    <div className="min-h-screen bg-background">
+      <div className="sticky top-0 z-1000">
+        <Header userName="Nguyễn Hải Linh" />
       </div>
       <HeroSection />
       <BookNew />

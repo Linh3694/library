@@ -1,4 +1,5 @@
 import { apiService, type StandardApiResponse } from './api';
+import { cache } from '../lib/cache';
 
 const BASE = '/api/method/erp.api.erp_sis.library_view';
 
@@ -126,13 +127,37 @@ export interface PublicLookupItem {
   name: string;
 }
 
+export interface PublicBookCopy {
+  name: string;
+  status: string;
+  title_id: string;
+  warehouse?: string;
+  book_title?: string;
+  publish_year?: number;
+  series_name?: string;
+  storage_location?: string;
+}
+
 class PublicLibraryService {
   /**
    * Lấy danh mục public (document_type, series)
    * @param type - "document_type" | "series" | "" (lấy cả 2)
    */
   async getPublicLookups(type: string = ""): Promise<StandardApiResponse<PublicLookupItem[]>> {
-    return apiService.get<PublicLookupItem[]>(`${BASE}.list_public_lookups`, { type });
+    const cacheKey = `library_lookups_${type}`;
+    const cachedData = cache.get<PublicLookupItem[]>(cacheKey);
+
+    if (cachedData) {
+      return { success: true, data: cachedData };
+    }
+
+    const response = await apiService.get<PublicLookupItem[]>(`${BASE}.list_public_lookups`, { type });
+
+    if (response.success && response.data) {
+      cache.set(cacheKey, response.data, 3600000); // 1 hour
+    }
+
+    return response;
   }
 
   /**
@@ -141,7 +166,20 @@ class PublicLibraryService {
    * @param page - Trang hiện tại (dùng khi có limit)
    */
   async getAllTitles(limit: number = 20, page: number = 1): Promise<StandardApiResponse<PublicLibraryTitle[]>> {
-    return apiService.get<PublicLibraryTitle[]>(`${BASE}.list_public_titles`, { limit, page });
+    const cacheKey = `library_all_titles_${limit}_${page}`;
+    const cachedData = cache.get<PublicLibraryTitle[]>(cacheKey);
+
+    if (cachedData) {
+      return { success: true, data: cachedData };
+    }
+
+    const response = await apiService.get<PublicLibraryTitle[]>(`${BASE}.list_public_titles`, { limit, page });
+
+    if (response.success && response.data) {
+      cache.set(cacheKey, response.data, 600000); // 10 minutes
+    }
+
+    return response;
   }
 
   /**
@@ -155,21 +193,60 @@ class PublicLibraryService {
    * Lấy sách nổi bật
    */
   async getFeaturedTitles(limit: number = 4): Promise<StandardApiResponse<PublicLibraryTitle[]>> {
-    return apiService.get<PublicLibraryTitle[]>(`${BASE}.list_featured_titles`, { limit });
+    const cacheKey = `library_featured_${limit}`;
+    const cachedData = cache.get<PublicLibraryTitle[]>(cacheKey);
+
+    if (cachedData) {
+      return { success: true, data: cachedData };
+    }
+
+    const response = await apiService.get<PublicLibraryTitle[]>(`${BASE}.list_featured_titles`, { limit });
+
+    if (response.success && response.data) {
+      cache.set(cacheKey, response.data, 300000); // 5 minutes
+    }
+
+    return response;
   }
 
   /**
    * Lấy sách mới
    */
   async getNewTitles(limit: number = 4): Promise<StandardApiResponse<PublicLibraryTitle[]>> {
-    return apiService.get<PublicLibraryTitle[]>(`${BASE}.list_new_titles`, { limit });
+    const cacheKey = `library_new_${limit}`;
+    const cachedData = cache.get<PublicLibraryTitle[]>(cacheKey);
+
+    if (cachedData) {
+      return { success: true, data: cachedData };
+    }
+
+    const response = await apiService.get<PublicLibraryTitle[]>(`${BASE}.list_new_titles`, { limit });
+
+    if (response.success && response.data) {
+      cache.set(cacheKey, response.data, 300000); // 5 minutes
+    }
+
+    return response;
   }
 
   /**
    * Lấy sách nói
    */
   async getAudioTitles(limit: number = 4): Promise<StandardApiResponse<PublicLibraryTitle[]>> {
-    return apiService.get<PublicLibraryTitle[]>(`${BASE}.list_audio_titles`, { limit });
+    const cacheKey = `library_audio_${limit}`;
+    const cachedData = cache.get<PublicLibraryTitle[]>(cacheKey);
+
+    if (cachedData) {
+      return { success: true, data: cachedData };
+    }
+
+    const response = await apiService.get<PublicLibraryTitle[]>(`${BASE}.list_audio_titles`, { limit });
+
+    if (response.success && response.data) {
+      cache.set(cacheKey, response.data, 300000); // 5 minutes
+    }
+
+    return response;
   }
 
   /**
@@ -177,19 +254,19 @@ class PublicLibraryService {
    */
   async getRelatedTitles(
     excludeId: string = '',
-    category: string = '', 
+    category: string = '',
     seriesName: string = '',
     documentType: string = '',
     authors: string[] = [],
     limit: number = 10
   ): Promise<StandardApiResponse<PublicLibraryTitle[]>> {
-    return apiService.get<PublicLibraryTitle[]>(`${BASE}.list_related_titles`, { 
+    return apiService.get<PublicLibraryTitle[]>(`${BASE}.list_related_titles`, {
       exclude_id: excludeId,
-      category, 
+      category,
       series_name: seriesName,
       document_type: documentType,
       authors: JSON.stringify(authors),
-      limit 
+      limit
     });
   }
 
@@ -197,18 +274,44 @@ class PublicLibraryService {
    * Lấy danh sách hoạt động/sự kiện
    */
   async getEvents(page: number = 1, limit: number = 20): Promise<StandardApiResponse<ActivitiesApiResponse>> {
-    return apiService.get<ActivitiesApiResponse>(`${BASE}.list_public_events`, { page, limit });
+    const cacheKey = `library_events_${page}_${limit}`;
+    const cachedData = cache.get<ActivitiesApiResponse>(cacheKey);
+
+    if (cachedData) {
+      return { success: true, data: cachedData };
+    }
+
+    const response = await apiService.get<ActivitiesApiResponse>(`${BASE}.list_public_events`, { page, limit });
+
+    if (response.success && response.data) {
+      cache.set(cacheKey, response.data, 600000); // 10 minutes
+    }
+
+    return response;
   }
 
   /**
    * Lấy danh sách bài giới thiệu sách (chỉ published)
    */
   async getBookIntroductions(page: number = 1, limit: number = 12, featuredOnly: boolean = false): Promise<StandardApiResponse<BookIntroductionsApiResponse>> {
-    return apiService.get<BookIntroductionsApiResponse>(`${BASE}.list_public_book_introductions`, { 
-      page, 
+    const cacheKey = `library_introductions_${page}_${limit}_${featuredOnly}`;
+    const cachedData = cache.get<BookIntroductionsApiResponse>(cacheKey);
+
+    if (cachedData) {
+      return { success: true, data: cachedData };
+    }
+
+    const response = await apiService.get<BookIntroductionsApiResponse>(`${BASE}.list_public_book_introductions`, {
+      page,
       limit,
       featured_only: featuredOnly ? 1 : 0
     });
+
+    if (response.success && response.data) {
+      cache.set(cacheKey, response.data, 600000); // 10 minutes
+    }
+
+    return response;
   }
 
   /**
@@ -223,6 +326,17 @@ class PublicLibraryService {
    */
   async getFeaturedIntroductions(limit: number = 3): Promise<StandardApiResponse<BookIntroductionsApiResponse>> {
     return this.getBookIntroductions(1, limit, true);
+  }
+
+  /**
+   * Lấy danh sách bản sao của một đầu sách
+   */
+  async getBookCopies(titleId: string): Promise<StandardApiResponse<PublicBookCopy[]>> {
+    return apiService.get<PublicBookCopy[]>('/api/method/frappe.client.get_list', {
+      doctype: 'SIS Library Book Copy',
+      filters: JSON.stringify({ title_id: titleId }),
+      fields: JSON.stringify(['name', 'status', 'warehouse', 'title_id', 'book_title', 'publish_year', 'series_name', 'storage_location'])
+    });
   }
 }
 

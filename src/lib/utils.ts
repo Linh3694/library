@@ -28,14 +28,14 @@ export const getImageUrl = (imagePath: string | undefined | null): string | unde
   if (!imagePath || imagePath.trim() === '') {
     return undefined;
   }
-  
+
   const cleanPath = imagePath.trim();
-  
+
   // Nếu đã là URL đầy đủ (bắt đầu với http), trả về as-is
   if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
     return cleanPath;
   }
-  
+
   // Nếu bắt đầu với '/', đây có thể là:
   // 1. Static asset từ public folder (local)
   // 2. File path từ Frappe (cần thêm base URL)
@@ -45,15 +45,22 @@ export const getImageUrl = (imagePath: string | undefined | null): string | unde
       return cleanPath;
     }
   }
-  
+
   // Ngược lại, đây là file từ Frappe server, thêm BASE_URL
   const BASE_URL = import.meta.env.VITE_FRAPPE_URL || 'https://prod.sis.wellspring.edu.vn';
-  
+
   // Đảm bảo không có double slash
   const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
   const finalUrl = `${BASE_URL}${finalPath}`;
-  
+
   console.log('🖼️ [getImageUrl] Processing:', { imagePath, cleanPath, finalUrl });
-  
+
   return finalUrl;
 };
+
+// Helper function để xóa số lượng trong ngoặc (ví dụ: "Sách (123)" hoặc "Sách (x.123)" -> "Sách")
+// Chỉ xóa nếu sau dấu ( là chữ số hoặc "x." followed by digits
+export function stripNumericSuffix(text: string | undefined | null): string {
+  if (!text) return '';
+  return text.replace(/\s*\(([xX]\.?)?\d+.*\)$/, '').trim();
+}

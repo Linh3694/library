@@ -2,14 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from '../../components/ui/breadcrumb';
+import Breadcrumbs from '../../components/Breadcrumbs';
 import { Pagination } from '../../components/ui/pagination';
 import { publicLibraryService, type PublicBookIntroduction } from '../../services/publicLibraryService';
 // import { type StandardApiResponse } from '../../lib/api';
@@ -107,12 +100,12 @@ const BookIntroductionsHomePage = () => {
 
   //     {/* Content */}
   //     <div className="p-5">
-  //       <h3 className={`font-bold text-[#002855] mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors ${
+  //       <h3 className={`font-bold text-oxford mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors ${
   //         featured ? 'text-xl' : 'text-lg'
   //       }`}>
   //         {intro.title}
   //       </h3>
-        
+
   //       {/* Related Book Info */}
   //       {intro.relatedBook && (
   //         <div className="mb-3">
@@ -138,30 +131,20 @@ const BookIntroductionsHomePage = () => {
   // );
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-10">
         <Header />
       </div>
 
       {/* Main Content */}
-      <div className="mx-[7%] px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-8 2xl:px-0 py-6">
         {/* Breadcrumb */}
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Trang chủ</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Giới thiệu sách</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <Breadcrumbs items={[{ label: 'Giới thiệu sách' }]} className="mb-9" />
 
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#002855] mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-oxford mx-auto mb-4"></div>
             <p className="text-gray-500">Đang tải...</p>
           </div>
         ) : error ? (
@@ -170,141 +153,64 @@ const BookIntroductionsHomePage = () => {
           </div>
         ) : (
           <>
-            {/* Featured Section - Carousel Style */}
-            {featuredIntros.length > 0 && (
-              <div className="mb-16">
-                <div className="relative flex items-center justify-center gap-4">
-                  {featuredIntros.map((intro, index) => {
-                    const isCenter = index === 1 && featuredIntros.length === 3;
-                    return (
-                      <div key={intro.id} className={`flex items-center ${isCenter ? 'h-[654px]' : 'h-[559px]'}`}>
-                        <Link
-                          to={`/book-introductions/${intro.slug}`}
-                          className={`group relative bg-white rounded-[96px] border border-gray-300 ${
-                            isCenter 
-                              ? 'w-[780px] h-[574px] scale-100 overflow-visible' 
-                              : 'w-[370px] h-[559px] scale-95 opacity-100 overflow-hidden mt-32'
-                          }`}
-                        >
-                        {/* Content */}
-                        <div className="relative h-full flex flex-col">
-
-                          {/* Middle Content */}
-                          <div className="flex-1 flex flex-col justify-center space-y-6 mb-6 px-10">
-                            {/* Tiêu đề */}
-                            <h3 className={`font-bold text-[#002855] uppercase ${
-                              isCenter ? 'text-2xl' : 'text-xl'
-                            }`}>
-                              {intro.title}
-                            </h3>
-                            
-                            {/* Tác giả */}
-                            {intro.relatedBook && intro.relatedBook.authors && intro.relatedBook.authors.length > 0 && (
-                              <p className="text-[#757575] font-medium text-sm">
-                                {intro.relatedBook.authors.join(', ')}
-                              </p>
-                            )}
-
-                        
-                            
-                            <p className={`text-[#757575] ${
-                              isCenter ? 'line-clamp-4 text-base' : 'line-clamp-3 text-sm'
-                            }`}>
-                              {intro.content}
-                            </p>
-
-                                {/* Nội dung mô tả */}
-                            <p className="text-[#757575] text-sm font-bold font-italic" style={{ fontStyle: 'italic' }}>
-                              {intro.description}
-                            </p>
-
-                          </div>
-
-                          {/* Bottom - Book Cover */}
-                          {intro.relatedBook?.cover_image && (
-                            <div className={`mt-auto mx-auto ${isCenter ? 'mb-[-200px] w-[680px] h-[380px]' : 'w-[370px] h-[221px]'}`}>
-                              <div className="relative w-full h-full rounded-[96px] overflow-hidden shadow-lg">
-                                <img
-                                  src={getImageUrl(intro.relatedBook.cover_image) || intro.relatedBook.cover_image}
-                                  alt={intro.relatedBook.title}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    console.error('Image load error:', intro.relatedBook?.cover_image);
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        </Link>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {/* Normal Section */}
-            <div className="mb-[5%] mt-[10%]">
+            <div className="mb-12">
               {normalIntros.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12 justify-items-center">
                   {normalIntros.map((intro) => (
-                    <div key={intro.id} className="flex items-center h-[559px]">
+                    <div key={intro.id} className="flex items-start h-full w-full justify-center">
                       <Link
                         to={`/book-introductions/${intro.slug}`}
-                        className="group relative bg-white rounded-[96px] border border-gray-300 w-[370px] h-[559px] scale-95 opacity-100 overflow-hidden mt-32"
+                        className="group relative bg-background rounded-[64px] md:rounded-[96px] border border-gray-300 w-full max-w-[400px] h-[600px] overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl"
                       >
                         {/* Content */}
-                        <div className="relative h-full flex flex-col">
+                        <div className="relative flex-1 flex flex-col">
                           {/* Middle Content */}
-                          <div className="flex-1 flex flex-col justify-center space-y-6 mb-6 px-10">
+                          <div className="flex-1 flex flex-col justify-start space-y-4 md:space-y-6 p-6 sm:p-8 lg:py-12 lg:px-10">
                             {/* Tiêu đề */}
-                            <h3 className="font-bold text-[#002855] uppercase text-xl">
+                            <h3 className="text-oxford text-xl md:text-2xl font-bold uppercase line-clamp-2">
                               {intro.title}
                             </h3>
-                            
+
                             {/* Tác giả */}
                             {intro.relatedBook && intro.relatedBook.authors && intro.relatedBook.authors.length > 0 && (
-                              <p className="text-[#757575] font-medium text-sm">
+                              <p className="text-dark-gray text-base font-semibold">
                                 {intro.relatedBook.authors.join(', ')}
                               </p>
                             )}
 
                             {/* Nội dung */}
-                            <p className="text-[#757575] line-clamp-3 text-sm">
+                            <p className="text-dark-gray text-base font-semibold leading-[21px] line-clamp-3">
                               {intro.content}
                             </p>
 
                             {/* Mô tả */}
-                            <p className="text-[#757575] text-sm font-bold font-italic" style={{ fontStyle: 'italic' }}>
+                            <p className="text-dark-gray text-base font-bold italic">
                               {intro.description}
                             </p>
                           </div>
 
                           {/* Bottom - Book Cover */}
-                          {intro.relatedBook?.cover_image && (
-                            <div className="mt-auto mx-auto w-[370px] h-[221px]">
-                              <div className="relative w-full h-full rounded-[96px] overflow-hidden shadow-lg">
-                                <img
-                                  src={getImageUrl(intro.relatedBook.cover_image) || intro.relatedBook.cover_image}
-                                  alt={intro.relatedBook.title}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    console.error('Image load error:', intro.relatedBook?.cover_image);
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
-                              </div>
+                          <div className="mt-auto mx-auto w-full">
+                            <div className="relative aspect-[16/9] rounded-[64px] md:rounded-[96px] overflow-hidden shadow-lg border-t border-gray-100">
+                              <img
+                                src={intro.relatedBook?.cover_image ? (getImageUrl(intro.relatedBook.cover_image) || intro.relatedBook.cover_image) : "/book-placeholder.png"}
+                                alt={intro.relatedBook?.title || "Book cover"}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = "/book-placeholder.png";
+                                }}
+                              />
                             </div>
-                          )}
+                          </div>
                         </div>
                       </Link>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-white rounded-xl">
+                <div className="text-center py-12 bg-background rounded-xl">
                   <p className="text-gray-500">Chưa có bài giới thiệu nào</p>
                 </div>
               )}
@@ -324,11 +230,12 @@ const BookIntroductionsHomePage = () => {
               </div>
             )}
           </>
-        )}
-      </div>
+        )
+        }
+      </div >
 
       <Footer />
-    </div>
+    </div >
   );
 };
 

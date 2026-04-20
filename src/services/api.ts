@@ -1,7 +1,9 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 
 // Frappe API configuration - Sử dụng environment variable hoặc fallback
-const FRAPPE_BASE_URL = import.meta.env.VITE_FRAPPE_URL || 'https://prod.sis.wellspring.edu.vn';
+const envUrl = import.meta.env.VITE_FRAPPE_URL;
+// Nếu VITE_FRAPPE_URL được định nghĩa (kể cả là rỗng), sử dụng nó. Ngược lại dùng fallback.
+const FRAPPE_BASE_URL = (typeof envUrl === 'string') ? envUrl : 'https://prod.sis.wellspring.edu.vn';
 
 // Standard API response type
 export interface StandardApiResponse<T> {
@@ -46,7 +48,7 @@ class ApiService {
     // Frappe trả về message object
     if (data && typeof data === 'object' && 'message' in data) {
       const messageData = data.message;
-      
+
       // Check if message contains success/data structure
       if (messageData && typeof messageData === 'object') {
         if ('success' in messageData) {
@@ -58,7 +60,7 @@ class ApiService {
             code: messageData.code,
           };
         }
-        
+
         // Direct data in message
         return {
           success: status >= 200 && status < 300,

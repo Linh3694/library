@@ -11,6 +11,19 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    port: 5173,
+    host: true,
+    allowedHosts: true, // Cho phép tất cả các host (bao gồm IP Tailscale)
+    proxy: {
+      // Cấu hình để "bắn" API sang server trường
+      '/api': {
+        target: 'https://prod.sis.wellspring.edu.vn',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   preview: {
     port: 4000,
     host: true,

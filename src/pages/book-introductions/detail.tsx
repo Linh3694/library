@@ -2,14 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from '../../components/ui/breadcrumb';
+import Breadcrumbs from '../../components/Breadcrumbs';
 import { Pagination } from '../../components/ui/pagination';
 import { publicLibraryService, type PublicBookIntroduction } from '../../services/publicLibraryService';
 import { getImageUrl } from '../../lib/utils';
@@ -160,13 +153,13 @@ const BookIntroductionDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-background">
         <div className="sticky top-0 z-10">
           <Header />
         </div>
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#002855] mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-oxford mx-auto mb-4"></div>
             <p className="text-gray-500">Đang tải...</p>
           </div>
         </div>
@@ -177,7 +170,7 @@ const BookIntroductionDetailPage = () => {
 
   if (error || !intro) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-background">
         <div className="sticky top-0 z-10">
           <Header />
         </div>
@@ -201,42 +194,33 @@ const BookIntroductionDetailPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="mx-[7%] px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <Breadcrumb className="mb-8">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Trang chủ</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/book-introductions">Giới thiệu sách</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{intro.title}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="max-w-[1600px] mx-auto px-4 md:px-8 2xl:px-0 py-6">
+        <Breadcrumbs
+          items={[
+            { label: 'Giới thiệu sách', href: '/book-introductions' },
+            { label: intro.title, current: true },
+          ]}
+          className="mb-9"
+        />
 
         {/* Main Card Container */}
         <div className="w-6xl mx-auto mb-16">
-          <div className="bg-white rounded-[96px] border border-gray-300 overflow-visible p-12">
+          <div className="bg-background rounded-[96px] border border-gray-300 overflow-visible p-12">
             {/* Content Section */}
             <div className="space-y-8">
               {/* Title */}
-              <h1 className="text-4xl font-bold text-[#002855] uppercase text-center">{intro.title}</h1>
+              <h1 className="text-4xl font-bold text-oxford uppercase text-center">{intro.title}</h1>
 
               {/* Author */}
               {intro.relatedBook && intro.relatedBook.authors && intro.relatedBook.authors.length > 0 && (
-                <p className="text-[#757575] font-medium text-lg text-center">
+                <p className="text-dark-gray font-medium text-lg text-center">
                   {intro.relatedBook.authors.join(', ')}
                 </p>
-              )}    
+              )}
 
-              
+
               {/* Description */}
-              <p className="text-[#757575] text-base font-bold font-italic italic text-center px-8">
+              <p className="text-dark-gray text-base font-bold font-italic italic text-center px-8">
                 {intro.description}
               </p>
 
@@ -247,13 +231,13 @@ const BookIntroductionDetailPage = () => {
                 <div className="prose prose-lg max-w-none markdown-content px-32 text-justify py-2">
                   <ReactMarkdown
                     components={{
-                      h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-[#002855] mb-4 mt-8" {...props} />,
-                      h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-[#002855] mb-3 mt-6" {...props} />,
-                      h3: ({ node, ...props }) => <h3 className="text-xl font-bold text-[#002855] mb-2 mt-4" {...props} />,
+                      h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-oxford mb-4 mt-8" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-oxford mb-3 mt-6" {...props} />,
+                      h3: ({ node, ...props }) => <h3 className="text-xl font-bold text-oxford mb-2 mt-4" {...props} />,
                       p: ({ node, ...props }) => {
                         // Check if paragraph contains only a link (potential video embed)
                         const children = props.children;
-                        
+
                         // Case 1: Single link element as child
                         if (Array.isArray(children) && children.length === 1 && typeof children[0] === 'object') {
                           const child = children[0] as any;
@@ -262,7 +246,7 @@ const BookIntroductionDetailPage = () => {
                             if (videoEmbed) return videoEmbed;
                           }
                         }
-                        
+
                         // Case 2: Plain text URL
                         if (typeof children === 'string') {
                           const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -272,12 +256,12 @@ const BookIntroductionDetailPage = () => {
                             if (videoEmbed) return videoEmbed;
                           }
                         }
-                        
-                        return <p className="text-[#757575] leading-relaxed mb-4" {...props} />;
+
+                        return <p className="text-dark-gray leading-relaxed mb-4" {...props} />;
                       },
                       ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-4 space-y-2" {...props} />,
                       ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-4 space-y-2" {...props} />,
-                      li: ({ node, ...props }) => <li className="text-[#757575]" {...props} />,
+                      li: ({ node, ...props }) => <li className="text-dark-gray" {...props} />,
                       blockquote: ({ node, ...props }) => (
                         <blockquote className="border-l-4 border-gray-300 pl-4 italic text-gray-600 my-4" {...props} />
                       ),
@@ -288,11 +272,11 @@ const BookIntroductionDetailPage = () => {
                         return <a className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />;
                       },
                       img: ({ node, src, alt, ...props }) => (
-                        <img 
-                          className="rounded-lg shadow-md my-6 max-w-full h-auto mx-auto" 
-                          src={getImageUrl(src)} 
+                        <img
+                          className="rounded-lg shadow-md my-6 max-w-full h-auto mx-auto"
+                          src={getImageUrl(src)}
                           alt={alt}
-                          {...props} 
+                          {...props}
                         />
                       ),
                     }}
@@ -310,8 +294,8 @@ const BookIntroductionDetailPage = () => {
 
         {/* Related Introductions Section */}
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-[#002855] mb-8 text-center">Có thể bạn cũng thích</h2>
-          
+          <h2 className="text-3xl font-bold text-oxford mb-8 text-center">Có thể bạn cũng thích</h2>
+
           {relatedIntros.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mb-[10%]">
@@ -319,51 +303,48 @@ const BookIntroductionDetailPage = () => {
                   <div key={relatedIntro.id} className="flex items-center h-[559px]">
                     <Link
                       to={`/book-introductions/${relatedIntro.slug}`}
-                      className="group relative bg-white rounded-[96px] border border-gray-300 w-[370px] h-[559px] scale-95 opacity-100 overflow-hidden mt-32 hover:shadow-xl transition-shadow"
+                      className="group relative bg-background rounded-[96px] border border-gray-300 w-[370px] h-[559px] scale-95 opacity-100 overflow-hidden mt-32 hover:shadow-xl transition-shadow"
                     >
                       {/* Content */}
                       <div className="relative h-full flex flex-col">
                         {/* Middle Content */}
                         <div className="flex-1 flex flex-col justify-center space-y-6 mb-6 px-10">
                           {/* Tiêu đề */}
-                          <h3 className="font-bold text-[#002855] uppercase text-xl">
+                          <h3 className="font-bold text-oxford uppercase text-xl">
                             {relatedIntro.title}
                           </h3>
-                          
+
                           {/* Tác giả */}
                           {relatedIntro.relatedBook && relatedIntro.relatedBook.authors && relatedIntro.relatedBook.authors.length > 0 && (
-                            <p className="text-[#757575] font-medium text-sm">
+                            <p className="text-dark-gray font-medium text-sm">
                               {relatedIntro.relatedBook.authors.join(', ')}
                             </p>
                           )}
 
                           {/* Nội dung */}
-                          <p className="text-[#757575] line-clamp-3 text-sm">
+                          <p className="text-dark-gray line-clamp-3 text-sm">
                             {relatedIntro.content}
                           </p>
 
                           {/* Mô tả */}
-                          <p className="text-[#757575] text-sm font-bold font-italic" style={{ fontStyle: 'italic' }}>
+                          <p className="text-dark-gray text-sm font-bold font-italic" style={{ fontStyle: 'italic' }}>
                             {relatedIntro.description}
                           </p>
                         </div>
 
                         {/* Bottom - Book Cover */}
-                        {relatedIntro.relatedBook?.cover_image && (
-                          <div className="mt-auto mx-auto w-[370px] h-[221px]">
-                            <div className="relative w-full h-full rounded-[96px] overflow-hidden shadow-lg">
-                              <img
-                                src={getImageUrl(relatedIntro.relatedBook.cover_image) || relatedIntro.relatedBook.cover_image}
-                                alt={relatedIntro.relatedBook.title}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  console.error('Image load error:', relatedIntro.relatedBook?.cover_image);
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            </div>
+                        <div className="mt-auto mx-auto w-[370px] h-[221px]">
+                          <div className="relative w-full h-full rounded-[96px] overflow-hidden shadow-lg">
+                            <img
+                              src={relatedIntro.relatedBook?.cover_image ? (getImageUrl(relatedIntro.relatedBook.cover_image) || relatedIntro.relatedBook.cover_image) : "/book-placeholder.png"}
+                              alt={relatedIntro.relatedBook?.title || "Book cover"}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = "/book-placeholder.png";
+                              }}
+                            />
                           </div>
-                        )}
+                        </div>
                       </div>
                     </Link>
                   </div>
@@ -385,7 +366,7 @@ const BookIntroductionDetailPage = () => {
               )}
             </>
           ) : (
-            <div className="text-center py-12 bg-white rounded-xl">
+            <div className="text-center py-12 bg-background rounded-xl">
               <p className="text-gray-500">Không có bài viết liên quan</p>
             </div>
           )}

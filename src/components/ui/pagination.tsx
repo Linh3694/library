@@ -135,7 +135,7 @@ const Pagination = React.forwardRef<
             className={cn(
               "w-9 h-9 p-0 rounded-full",
               isActive 
-                ? "bg-[#002855] text-white border-[#002855] hover:bg-[#002855]/90" 
+                ? "bg-oxford text-white border-oxford hover:bg-oxford/90" 
                 : "border-gray-200 text-gray-700 hover:bg-gray-50"
             )}
           >
